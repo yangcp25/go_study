@@ -127,6 +127,5 @@ func main() {
 	linkedListOne.insertNode(2)
 	linkedListOne.insertNode(3)
 	fmt.Printf("删除数据3\n")
-
 	linkedListOne.removeNode(3)
 }
