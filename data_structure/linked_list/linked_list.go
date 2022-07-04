@@ -51,7 +51,7 @@ func createNode(v interface{}, nextNode *node) *node {
 func (linkedList *linkedList) insertNode(v interface{}) bool {
 	// 指定头结点
 	nodeData := linkedList.nodeHead
-	// 拿到末尾的指针
+	// 拿到末尾节点的指针
 	for nodeData.next != nil {
 		nodeData = nodeData.next
 	}
