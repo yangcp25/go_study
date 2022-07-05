@@ -9,6 +9,7 @@ func main() {
 	intArray := []int{4, 5, 3}
 	res := bubbleSort(intArray[:])
 	fmt.Printf("%v", res)
+	fmt.Printf("%v", res)
 }
 
 func bubbleSort(arrayData []int) []int {
