@@ -6,24 +6,25 @@ import "fmt"
 // 时间复杂度 O(n2)
 // 相邻元素不会发生交换 稳定的算法
 func main() {
-	intArray := []int{4, 5, 3}
+	intArray := []int{4, 5, 6, 7, 8, 3, 2, 1}
 	res := bubbleSort(intArray[:])
 	fmt.Printf("%v", res)
 }
 
 func bubbleSort(arrayData []int) []int {
 	length := len(arrayData)
-	for i := 0; i < length; i++ {
-		j := i - 1
+	for i := 1; i < length; i++ {
 		val := arrayData[i]
-		for ; j >= 0; j-- {
-			if val > arrayData[j] {
-				break
-			} else {
+		var temp int
+		for j := i - 1; j >= 0; j-- {
+			if arrayData[j] > val {
 				arrayData[j+1] = arrayData[j]
+			} else {
+				temp = j + 1
+				break
 			}
 		}
-		arrayData[j+1] = val
+		arrayData[temp] = val
 	}
 	return arrayData
 }
