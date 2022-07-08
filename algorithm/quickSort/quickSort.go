@@ -2,7 +2,7 @@ package main
 
 import "fmt"
 
-// 选择
+// 快速排序
 // 时间复杂度 O(n2)
 // 稳定的算法
 func main() {
