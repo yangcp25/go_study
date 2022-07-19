@@ -3,10 +3,10 @@ package main
 import "fmt"
 
 // 快速排序
-// 时间复杂度 O(n2)
+// 时间复杂度
 // 稳定的算法
 func main() {
-	intArray := []int{4, 5, 6, 7, 3, 2, 1, 8, 0}
+	intArray := []int{4, 5, 6, 7, 3, 2, 1, 8, 9}
 	intArray2 := []int{2, 1}
 	quickSort(intArray[:], 0, len(intArray)-1)
 	quickSort(intArray2[:], 0, len(intArray2)-1)
