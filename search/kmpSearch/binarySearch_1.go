@@ -15,18 +15,20 @@ func main() {
 
 func strStrV1(s string, p string) int {
 	m, n := len(s), len(p)
-	for i := 0; i < (m - n + 1); i++ {
-		j := 0
-		for ; j < n; j++ {
-			if s[i+j] != p[j] {
-				break
-			} else {
-				// 最后一个
-				if j == n-1 {
-					return i
-				}
-			}
+	i, j := 0, 0
+	next := make([]int, n)
+	next = getNext(p)
+	for i < m {
+		if j == -1 || s[i] == p[j] {
+			j++
+			i++
+		} else {
+			j = next[j]
 		}
 	}
 	return -1
+}
+
+func getNext(p string) []int {
+
 }
