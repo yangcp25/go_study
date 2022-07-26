@@ -14,11 +14,10 @@ func main() {
 }
 
 func strStrV1(s string, p string) int {
-	m, n := len(s), len(p)
+	n, m := len(s), len(p)
 	i, j := 0, 0
-	next := make([]int, n)
-	next = getNext(p)
-	for i < m {
+	next := getNext(p)
+	for i < n && j < m {
 		if j == -1 || s[i] == p[j] {
 			j++
 			i++
@@ -26,9 +25,26 @@ func strStrV1(s string, p string) int {
 			j = next[j]
 		}
 	}
+	if j == m {
+		return i - j
+	}
 	return -1
 }
 
 func getNext(p string) []int {
-
+	m := len(p)
+	next := make([]int, m, m)
+	next[0] = -1
+	next[1] = 0
+	i, j := 0, 1
+	for j < m-1 {
+		if i == -1 || p[i] == p[j] {
+			j++
+			i++
+			next[j] = i
+		} else {
+			i = next[j]
+		}
+	}
+	return next
 }
