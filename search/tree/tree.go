@@ -75,6 +75,7 @@ func (t *Tree) find(str string) bool {
 		root = val
 	}
 
+	// 不是完全匹配只是子集
 	if root.isEnd != true {
 		return false
 	}
