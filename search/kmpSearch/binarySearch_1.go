@@ -39,11 +39,11 @@ func getNext(p string) []int {
 	i, j := 0, 1
 	for j < m-1 {
 		if i == -1 || p[i] == p[j] {
-			j++
 			i++
+			j++
 			next[j] = i
 		} else {
-			i = next[j]
+			i = next[i]
 		}
 	}
 	return next
