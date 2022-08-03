@@ -3,32 +3,24 @@ package main
 import (
 	"errors"
 	"fmt"
-	"math"
 )
 
 // 树的三种遍历
 func main() {
 	// 简化版树结构
-	tree := initNode(nil)
-	tree.Insert(3)
-	tree.Insert(2)
-	tree.Insert(5)
-	tree.Insert(1)
-	tree.Insert(4)
-	tree.Insert(7)
-	tree.Insert(6)
+	avlTree := initNode(3)
+	avlTree.Insert(2)
+	avlTree.Insert(1)
+	avlTree.Insert(4)
+	avlTree.Insert(5)
+	avlTree.Insert(6)
+	avlTree.Insert(7)
+	avlTree.Insert(10)
+	avlTree.Insert(9)
+	avlTree.Insert(8)
 	fmt.Println("中序遍历二叉排序树：")
-	midOrderTraverse(tree.rootNode)
+	avlTree.Traverse()
 	fmt.Println()
-}
-
-func midOrderTraverse(t *TreeNode) {
-	if t == nil {
-		return
-	}
-	midOrderTraverse(t.Left)
-	t.printNode()
-	midOrderTraverse(t.Right)
 }
 
 // Insert 二叉排序树插入
@@ -50,29 +42,86 @@ func (node *TreeNode) Insert(value int) *TreeNode {
 	} else if node.Data == value {
 		return node
 	} else {
+		// 对于当前节点来说 走的左子树
 		if value < node.Data {
+			// 每次递归返回的都是根节点
 			node.Left = node.Left.Insert(value)
-			// 查看平衡因子
+			// 查看平衡因子，相当于检查了每个节点的平衡因子
 			bf := node.BalanceFactor()
-			bf = int(math.Abs(float64(bf)))
-			if bf > 2 {
+			// 取等于2的 就是取最小不平衡子树
+			if bf == 2 {
+				// 在最小不平衡子树判断是什么类型的
+				// 因为value < node.Data 说明先走的左子树 然后这里判断走的左还是右
+				if value < node.Left.Data { // LL型
+					newTreeNode = RightRotate(node)
+				} else { //LR型
+					newTreeNode = LeftRightRotate(node)
+				}
 			}
 		} else if value > node.Data {
-			// 当前右子树为空 可以插入
-			if node.Right == nil {
-				node.Right = newNode(value)
+			// 每次递归返回的都是根节点
+			node.Right = node.Right.Insert(value)
+			// 查看平衡因子，相当于检查了每个节点的平衡因子
+			bf := node.BalanceFactor()
+			// 取等于-2的 就是取最小不平衡子树
+			if bf == -2 {
+				// 在最小不平衡子树判断是什么类型的
+				// 因为value > node.Data 说明先走的右子树 然后这里判断走的左还是右
+				if value < node.Right.Data { // LL型
+					newTreeNode = LeftRotate(node)
+				} else { //LR型
+					newTreeNode = RightLeftRotate(node)
+				}
 			}
-			// 如果当前值比树节点的值大 则继续在右子树查找
-			return node.Right.Insert(value)
 		}
 	}
 	// 返回的是根节点
 	// 没有发生平衡被破坏直接返回根节点就行
 	if newTreeNode == nil {
+		node.UpdateHeight()
 		return node
 	} else {
+		newTreeNode.UpdateHeight()
 		return newTreeNode
 	}
+}
+
+func RightRotate(node *TreeNode) *TreeNode {
+	// 左子树作为根节点
+	rootNode := node.Left
+	nodeRight := rootNode.Right
+	// 根节点作为左子树的右子树
+	rootNode.Right = node
+	// 左子树的右子树 挂靠到根节点的左子树
+	node.Left = nodeRight
+	// 更新变化了的节点高度
+	node.UpdateHeight()
+	rootNode.UpdateHeight()
+
+	return rootNode
+}
+
+func LeftRotate(node *TreeNode) *TreeNode {
+	rootNode := node.Right
+	nodeLeft := rootNode.Left
+	rootNode.Left = node
+	node.Right = nodeLeft
+
+	node.UpdateHeight()
+	rootNode.UpdateHeight()
+
+	return rootNode
+}
+
+func RightLeftRotate(node *TreeNode) *TreeNode {
+	rightNode := node.Right
+	node.Right = RightRotate(rightNode)
+	return LeftRotate(node)
+}
+func LeftRightRotate(node *TreeNode) *TreeNode {
+	LeftNode := node.Left
+	node.Left = LeftRotate(LeftNode)
+	return RightRotate(node)
 }
 
 // 二叉排序树查找
