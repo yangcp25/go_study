@@ -3,7 +3,6 @@ package main
 import (
 	"errors"
 	"fmt"
-	"math"
 )
 
 // 树的三种遍历
@@ -54,8 +53,8 @@ func (node *TreeNode) Insert(value int) *TreeNode {
 			node.Left = node.Left.Insert(value)
 			// 查看平衡因子
 			bf := node.BalanceFactor()
-			bf = int(math.Abs(float64(bf)))
 			if bf > 2 {
+
 			}
 		} else if value > node.Data {
 			// 当前右子树为空 可以插入
