@@ -21,6 +21,19 @@ func main() {
 	fmt.Println("中序遍历二叉排序树：")
 	avlTree.Traverse()
 	fmt.Println()
+	isAvl := avlTree.isAvlTree()
+	if isAvl {
+		fmt.Println("是个平衡二叉排序树哟！崽儿")
+	}
+
+}
+
+// 判断是否是平衡树
+func (tree *Tree) isAvlTree() bool {
+	if tree == nil || tree.rootNode == nil {
+		return true
+	}
+	return tree.rootNode.isBalanced()
 }
 
 // Insert 二叉排序树插入
