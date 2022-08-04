@@ -114,13 +114,11 @@ func LeftRotate(node *TreeNode) *TreeNode {
 }
 
 func RightLeftRotate(node *TreeNode) *TreeNode {
-	rightNode := node.Right
-	node.Right = RightRotate(rightNode)
+	node.Right = RightRotate(node.Right)
 	return LeftRotate(node)
 }
 func LeftRightRotate(node *TreeNode) *TreeNode {
-	LeftNode := node.Left
-	node.Left = LeftRotate(LeftNode)
+	node.Left = LeftRotate(node.Left)
 	return RightRotate(node)
 }
 
