@@ -67,7 +67,7 @@ func (node *TreeNode) Insert(value int) *TreeNode {
 			if bf == -2 {
 				// 在最小不平衡子树判断是什么类型的
 				// 因为value > node.Data 说明先走的右子树 然后这里判断走的左还是右
-				if value < node.Right.Data { // LL型
+				if value > node.Right.Data { // LL型
 					newTreeNode = LeftRotate(node)
 				} else { //LR型
 					newTreeNode = RightLeftRotate(node)
@@ -89,7 +89,10 @@ func (node *TreeNode) Insert(value int) *TreeNode {
 func RightRotate(node *TreeNode) *TreeNode {
 	// 左子树作为根节点
 	rootNode := node.Left
-	nodeRight := rootNode.Right
+	var nodeRight *TreeNode
+	if rootNode != nil {
+		nodeRight = rootNode.Right
+	}
 	// 根节点作为左子树的右子树
 	rootNode.Right = node
 	// 左子树的右子树 挂靠到根节点的左子树
