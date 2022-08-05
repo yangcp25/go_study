@@ -162,6 +162,7 @@ func (node *TreeNode) delete(i int) *TreeNode {
 				}
 
 				node.Data = maxNode.Data
+				// 这里要递归删除, 才可更新每个节点高度
 				node.Left = node.Left.delete(maxNode.Data)
 				node.Left.UpdateHeight()
 			} else {
