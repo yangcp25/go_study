@@ -25,7 +25,14 @@ func main() {
 	if isAvl {
 		fmt.Println("是个平衡二叉排序树哟！崽儿")
 	}
-
+	avlTree.delete(5)
+	fmt.Println("把5删了")
+	isAvl = avlTree.isAvlTree()
+	if isAvl {
+		fmt.Println("还是是个平衡二叉排序树哟！崽儿")
+	}
+	fmt.Println("中序遍历二叉排序树：")
+	avlTree.Traverse()
 }
 
 // 判断是否是平衡树

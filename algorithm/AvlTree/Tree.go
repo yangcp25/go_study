@@ -17,6 +17,13 @@ func (tree *Tree) Traverse() {
 	tree.rootNode.midOrderTraverse()
 }
 
+func (tree *Tree) delete(i int) {
+	if tree == nil {
+		return
+	}
+	tree.rootNode = tree.rootNode.delete(i)
+}
+
 // 递归方式中序遍历树
 func (node *TreeNode) midOrderTraverse() {
 	if node == nil {
@@ -124,6 +131,88 @@ func (node *TreeNode) isBalanced() bool {
 		}
 	}
 	return true
+}
+
+// delete 节点删除
+func (node *TreeNode) delete(i int) *TreeNode {
+
+	if node == nil {
+		return nil
+	}
+	// 先通过递归找到要删除的节点
+	if i < node.Data {
+		node.Left = node.Left.delete(i)
+		node.Left.UpdateHeight()
+	} else if i > node.Data {
+		node.Right = node.Right.delete(i)
+		node.Right.UpdateHeight()
+	} else {
+		// 找到了，3种情况
+		// (1)删除的节点没有子节点
+		if node.Left == nil && node.Right == nil {
+			return nil
+		} else if node.Left != nil && node.Right != nil {
+			// (3)删除的节点有2个节点
+			// 应该去删除高端更高那边的子树
+			if node.Left.Height > node.Right.Height {
+				// 找左子树最大的节点
+				maxNode := node.Left
+				for maxNode.Right != nil {
+					maxNode = maxNode.Right
+				}
+
+				node.Data = maxNode.Data
+				node.Left = node.Left.delete(maxNode.Data)
+				node.Left.UpdateHeight()
+			} else {
+				// 找右子树最小的节点
+				minNode := node.Right
+				for minNode.Left != nil {
+					minNode = minNode.Left
+				}
+
+				node.Data = minNode.Data
+				node.Right = node.Right.delete(minNode.Data)
+				node.Right.UpdateHeight()
+			}
+		} else {
+			// (2)删除的节点只有一个节点
+			if node.Left != nil {
+				node.Data = node.Left.Data
+				node.Height = 1
+				node.Left = nil
+			} else {
+				node.Data = node.Right.Data
+				node.Height = 1
+				node.Right = nil
+			}
+		}
+		return node
+	}
+	// 查看平衡因子 重新构建平衡树
+	bf := node.BalanceFactor()
+	var newNode *TreeNode
+	if bf == 2 {
+		if node.Left.BalanceFactor() > 0 {
+			newNode = RightRotate(node)
+		} else {
+			newNode = LeftRightRotate(node)
+		}
+	}
+	if bf == -2 {
+		if node.Right.BalanceFactor() < 0 {
+			newNode = LeftRotate(node)
+		} else {
+			newNode = RightLeftRotate(node)
+		}
+	}
+	if newNode == nil {
+		node.UpdateHeight()
+		return node
+	} else {
+		newNode.UpdateHeight()
+		return newNode
+	}
 }
 
 // 定义树，保存根节点就可以
