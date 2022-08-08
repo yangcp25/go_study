@@ -1,74 +1,52 @@
 package main
 
 import (
-	"io"
 	"log"
-	"math/rand"
-	"sourcesPool/pool"
+	"sourcesPool2/pool"
 	"sync"
-	"sync/atomic"
 	"time"
 )
 
+var stringStr = []string{
+	"python",
+	"java",
+	"php",
+	"golang",
+	"javascript",
+}
+
 const (
-	maxGoroutines = 10
+	maxGoroutines = 5
 	maxResources  = 2
 )
 
-var idCounter int32
-
-type dbConnect struct {
-	Id int32
+type langPrinter struct {
+	Str string
 }
 
-func (d dbConnect) Close() error {
-	log.Println("Close:", "关闭的Id", d.Id)
-	return nil
-}
-
-func createConnection() (io.Closer, error) {
-	id := atomic.AddInt32(&idCounter, 1)
-	log.Println("createConnection:", "新增链接ID", id)
-
-	return &dbConnect{
-		id,
-	}, nil
+func (l langPrinter) Task() {
+	log.Println(l.Str)
+	time.Sleep(time.Duration(1) * time.Second)
 }
 
 // 协程池 无缓冲版
 func main() {
-	// 使用withGroup 协同 多个协程状态
 	wg := &sync.WaitGroup{}
 	wg.Add(maxGoroutines)
-	poolObj, err := pool.New(createConnection, maxResources)
 
-	if err != nil {
-		log.Println(err)
-	}
+	poolObj := pool.New(maxResources)
 
 	for i := 0; i < maxGoroutines; i++ {
-		go func(i int) {
-			// 模拟sql查询
-			performQuery(i, poolObj)
-			wg.Done()
-		}(i)
+		for _, str := range stringStr {
+			printer := &langPrinter{Str: str}
+			// 放入work
+			go func() {
+				poolObj.Run(printer)
+				wg.Done()
+			}()
+		}
 	}
 
 	wg.Wait()
-
-	log.Println("查询跑完了！")
-}
-
-//
-func performQuery(i int, obj *pool.Pool) {
-	conn, err := obj.Acquire()
-
-	if err != nil {
-		log.Println(err)
-		return
-	}
-
-	defer obj.Release(conn)
-	time.Sleep(time.Duration(rand.Intn(100)) * time.Millisecond)
-	log.Printf("查询ID[%d]:数据库连接ID[%d]\n", i, conn.(*dbConnect).Id)
+	poolObj.Close()
 }

@@ -9,14 +9,14 @@ type Worker interface {
 }
 type Pool struct {
 	// 任务管道
-	worker chan Worker
+	Worker chan Worker
 	// 协程控制
 	wg sync.WaitGroup
 }
 
 func New(maxGoroutines int) *Pool {
 	p := Pool{
-		worker: make(chan Worker),
+		Worker: make(chan Worker),
 	}
 
 	p.wg.Add(maxGoroutines)
@@ -24,7 +24,7 @@ func New(maxGoroutines int) *Pool {
 
 	for i := 0; i < maxGoroutines; i++ {
 		go func() {
-			for w := range p.worker {
+			for w := range p.Worker {
 				w.Task()
 			}
 			p.wg.Done()
@@ -32,4 +32,13 @@ func New(maxGoroutines int) *Pool {
 	}
 
 	return &p
+}
+
+func (p *Pool) Run(w Worker) {
+	p.Worker <- w
+}
+
+func (p *Pool) Close() {
+	close(p.Worker)
+	p.wg.Wait()
 }
