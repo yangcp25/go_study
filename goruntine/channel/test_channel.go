@@ -3,13 +3,18 @@ package main
 import (
 	"fmt"
 	"math/rand"
+	"runtime"
+	"strconv"
+	"sync"
 	"time"
 )
 
 func main() {
 
+	// for 里面使用通道
+	test9()
 	// 避免关闭已经关闭的通道
-	test8()
+	//test8()
 	// 超时机制实现
 	//test7()
 	//
@@ -28,6 +33,32 @@ func main() {
 	// 单向通道：是指程序上规定通信的方向不是语言层面上的限制；语言上始终支持发送和接收
 	//test5()
 	//
+}
+
+func test9() {
+	var wg sync.WaitGroup
+	ch1 := make(chan int, 100)
+	runtime.GOMAXPROCS(runtime.NumCPU())
+	wg.Add(100)
+	for i := 0; i < 100; i++ {
+		go func(index int) {
+			ch1 <- index
+			wg.Done()
+		}(i)
+	}
+	//不关闭会报 all goroutines are asleep
+	go func() {
+		wg.Wait()
+	}()
+	//defer close(ch1)
+	index := 0
+	// range 会无限循环 直到关闭通道
+	for i := range ch1 {
+		fmt.Println(i)
+		index++
+	}
+	fmt.Println("index:" + strconv.Itoa(index))
+	close(ch1)
 }
 
 func test8() {

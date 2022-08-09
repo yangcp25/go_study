@@ -32,7 +32,7 @@ func (l langPrinter) Task() {
 // 协程池 无缓冲版
 func main() {
 	wg := &sync.WaitGroup{}
-	wg.Add(maxGoroutines)
+	wg.Add(maxGoroutines * len(stringStr))
 
 	poolObj := pool.New(maxResources)
 

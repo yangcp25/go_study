@@ -24,11 +24,12 @@ func New(maxGoroutines int) *Pool {
 
 	for i := 0; i < maxGoroutines; i++ {
 		go func() {
+			// 这里是一个死循环 ，除非关闭通道才会跳出循环
 			for w := range p.Worker {
 				w.Task()
 			}
-			p.wg.Done()
 		}()
+		p.wg.Done()
 	}
 
 	return &p
