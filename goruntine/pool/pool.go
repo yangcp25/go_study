@@ -28,13 +28,13 @@ func test2() {
 	fmt.Printf("%s", pool.Get())
 	fmt.Printf("%s", pool.Get())
 
-	/*pool.Put("test1")
-	pool.Put("test2")
-	fmt.Printf("%s\n", pool.Get())
-	fmt.Printf("%s\n", pool.Get())
-	fmt.Printf("%s\n", pool.Get())
-	fmt.Printf("%s\n", pool.Get())
-	fmt.Printf("%s\n", pool.Get())*/
+	/*tool.Put("test1")
+	tool.Put("test2")
+	fmt.Printf("%s\n", tool.Get())
+	fmt.Printf("%s\n", tool.Get())
+	fmt.Printf("%s\n", tool.Get())
+	fmt.Printf("%s\n", tool.Get())
+	fmt.Printf("%s\n", tool.Get())*/
 }
 
 func add2(pool *sync.Pool, done func()) {
