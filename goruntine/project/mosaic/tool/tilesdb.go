@@ -12,7 +12,7 @@ import (
 var TILESDB map[string][3]float64
 
 // 克隆一个图片DB
-func CloneDb() map[string][3]float64 {
+func cloneDb() map[string][3]float64 {
 	db := make(map[string][3]float64)
 	for k, item := range TILESDB {
 		db[k] = item
