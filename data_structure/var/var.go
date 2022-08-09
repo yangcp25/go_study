@@ -1,9 +1,39 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"math"
+)
 
 // 指针 和变量
 func main() {
+	//test1()
+	//t := test2()
+	//fmt.Printf("%v\n", &t.data)
+	test4()
+}
+
+func test4() {
+	fmt.Println(math.Sqrt(2))
+}
+
+// 如果返回的不是指针类型 那就是按值传递 ，否则是引用传递
+func test2() *node {
+	//
+	t := test3()
+	fmt.Printf("%v\n", &t.data)
+	return t
+}
+
+type node struct {
+	data int
+}
+
+func test3() *node {
+	return &node{1}
+}
+
+func test1() {
 	/*a := 1
 	b := &a
 
@@ -32,4 +62,6 @@ func main() {
 	fmt.Printf("%v \n", *b)
 	fmt.Printf("%v \n", b.data)
 	fmt.Printf("%v \n", c)
+
+	//
 }
