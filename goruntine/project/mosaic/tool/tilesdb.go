@@ -65,13 +65,13 @@ func nearest(img [3]float64, db *map[string][3]float64) string {
 			file, smallDis = name, dis
 		}
 	}
-	if file == "" {
+	/*if file == "" {
 		for name, _ := range *db {
 			file = name
 			break
 		}
-	}
-	//delete(*db, file)
+	}*/
+	delete(*db, file)
 	return file
 }
 
