@@ -7,7 +7,10 @@ import (
 	"html/template"
 	"image"
 	"image/draw"
+	_ "image/gif"
 	"image/jpeg"
+	_ "image/jpeg"
+	_ "image/png"
 	"net/http"
 	"os"
 	"strconv"
@@ -33,25 +36,29 @@ func Mosaic(writer http.ResponseWriter, request *http.Request) {
 	// 从原始图标将图片按tileSize分成几个区域
 	sp := image.Point{}
 	for y := bounds.Min.Y; y < bounds.Max.Y; y = y + tileSize {
-		for x := bounds.Min.X; y < bounds.Max.X; x = x + tileSize {
+		for x := bounds.Min.X; x < bounds.Max.X; x = x + tileSize {
 			r, g, b, _ := original.At(x, y).RGBA()
 			color := [3]float64{float64(r), float64(g), float64(b)}
 			nearest := nearest(color, &db)
 
+			//exPath, _ := os.Getwd()
+			//nearest = exPath + "/" + nearest
+			fmt.Println("nearest------", nearest)
 			file, err := os.Open(nearest)
 
 			if err == nil {
 				img, _, err := image.Decode(file)
-				if err != nil {
+				if err == nil {
 					t := Resize(img, tileSize)
 					tile := t.SubImage(t.Bounds())
 					tileBounds := image.Rect(x, y, x+tileSize, y+tileSize)
 					draw.Draw(newImage, tileBounds, tile, sp, draw.Src)
 				} else {
-					fmt.Println("加载图片出错", err, file)
+					fmt.Println("加载图片出错2", err, file)
 				}
 			} else {
-				fmt.Println("载入图片出错", err, file)
+				fmt.Println("载入图片出错--", nearest)
+				fmt.Println("载入图片出错0", err, file, nearest)
 			}
 			file.Close()
 		}
@@ -73,6 +80,7 @@ func Mosaic(writer http.ResponseWriter, request *http.Request) {
 		"time":     fmt.Sprintf("%v ", t1.Sub(t0)),
 	}
 
+	fmt.Printf("%v", imagesRes)
 	t, _ := template.ParseFiles("views/results.html")
 
 	t.Execute(writer, imagesRes)

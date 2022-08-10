@@ -38,7 +38,7 @@ func Resize(img image.Image, newWidth int) *image.NRGBA {
 
 	// 按比例重新存放像素值
 	for x, i := bounds.Min.X, bounds.Min.X; x < bounds.Max.X; x, i = x+rate, i+1 {
-		for y, j := bounds.Min.X, bounds.Min.X; y < bounds.Max.X; y, j = x+rate, j+1 {
+		for y, j := bounds.Min.Y, bounds.Min.Y; y < bounds.Max.Y; y, j = y+rate, j+1 {
 			r, g, b, a := img.At(x, y).RGBA()
 			newImage.SetNRGBA(i, j, color.NRGBA{
 				R: uint8(r),

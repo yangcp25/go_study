@@ -13,7 +13,7 @@ func main() {
 	files := http.FileServer(http.Dir("public"))
 
 	// 路由
-	mux.Handle("/static", http.StripPrefix("/static/", files))
+	mux.Handle("/static/", http.StripPrefix("/static/", files))
 	mux.HandleFunc("/", tool.Upload)
 	mux.HandleFunc("/mosaic", tool.Mosaic)
 
@@ -22,7 +22,7 @@ func main() {
 		Handler: mux,
 	}
 
-	tool.TILESDB = tool.CloneDb()
+	tool.TILESDB = tool.TilesDb()
 	fmt.Println("马赛克服务器已启动...")
 	server.ListenAndServe()
 }

@@ -3,6 +3,9 @@ package tool
 import (
 	"fmt"
 	"image"
+	_ "image/gif"
+	_ "image/jpeg"
+	_ "image/png"
 	"io/ioutil"
 	"log"
 	"math"
@@ -32,6 +35,7 @@ func TilesDb() map[string][3]float64 {
 
 	for _, file := range files {
 		name := "tiles/" + file.Name()
+		fmt.Println(name)
 		f, err := os.Open(name)
 		if err == nil {
 			img, _, err := image.Decode(f)
@@ -41,10 +45,12 @@ func TilesDb() map[string][3]float64 {
 				fmt.Println("构建嵌入图片数据库出错", err, name)
 			}
 		} else {
-			fmt.Println("载入图片出错", err, name)
+			fmt.Println("载入图片出错1", err, name)
 		}
 		f.Close()
 	}
+	fmt.Print(db)
+	fmt.Println("完成嵌入图片数据库构建")
 	return db
 }
 
@@ -54,11 +60,18 @@ func nearest(img [3]float64, db *map[string][3]float64) string {
 	var smallDis = 1000000.0
 	for name, rgb := range *db {
 		dis := distance(rgb, img)
+		fmt.Printf("%v", dis)
 		if dis < smallDis {
 			file, smallDis = name, dis
 		}
 	}
-	delete(*db, file)
+	if file == "" {
+		for name, _ := range *db {
+			file = name
+			break
+		}
+	}
+	//delete(*db, file)
 	return file
 }
 
