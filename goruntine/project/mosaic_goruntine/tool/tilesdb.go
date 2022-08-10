@@ -10,7 +10,40 @@ import (
 	"log"
 	"math"
 	"os"
+	"sync"
 )
+
+type DB struct {
+	mutex *sync.Mutex
+	store map[string][3]float64
+}
+
+func (db *DB) Nearest(target [3]float64) string {
+	var filename string
+	db.mutex.Lock()
+	smallest := 1000000.0
+	for k, v := range db.store {
+		dist := distance(target, v)
+		if dist < smallest {
+			filename, smallest = k, dist
+		}
+	}
+	delete(db.store, filename)
+	db.mutex.Unlock()
+	return filename
+}
+
+func CloneTilesDB() DB {
+	store := make(map[string][3]float64)
+	for k, v := range TILESDB {
+		store[k] = v
+	}
+	db := DB{
+		store: store,
+		mutex: &sync.Mutex{},
+	}
+	return db
+}
 
 var TILESDB map[string][3]float64
 
