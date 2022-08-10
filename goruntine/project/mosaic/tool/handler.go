@@ -34,7 +34,7 @@ func Mosaic(writer http.ResponseWriter, request *http.Request) {
 	db := CloneDb()
 
 	// 从原始图标将图片按tileSize分成几个区域
-	sp := image.Point{}
+	sp := image.Point{0, 0}
 	for y := bounds.Min.Y; y < bounds.Max.Y; y = y + tileSize {
 		for x := bounds.Min.X; x < bounds.Max.X; x = x + tileSize {
 			r, g, b, _ := original.At(x, y).RGBA()
