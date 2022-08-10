@@ -41,9 +41,6 @@ func Mosaic(writer http.ResponseWriter, request *http.Request) {
 			color := [3]float64{float64(r), float64(g), float64(b)}
 			nearest := nearest(color, &db)
 
-			//exPath, _ := os.Getwd()
-			//nearest = exPath + "/" + nearest
-			fmt.Println("nearest------", nearest)
 			file, err := os.Open(nearest)
 
 			if err == nil {
@@ -57,7 +54,6 @@ func Mosaic(writer http.ResponseWriter, request *http.Request) {
 					fmt.Println("加载图片出错2", err, file)
 				}
 			} else {
-				fmt.Println("载入图片出错--", nearest)
 				fmt.Println("载入图片出错0", err, file, nearest)
 			}
 			file.Close()
@@ -80,7 +76,6 @@ func Mosaic(writer http.ResponseWriter, request *http.Request) {
 		"time":     fmt.Sprintf("%v ", t1.Sub(t0)),
 	}
 
-	fmt.Printf("%v", imagesRes)
 	t, _ := template.ParseFiles("views/results.html")
 
 	t.Execute(writer, imagesRes)
