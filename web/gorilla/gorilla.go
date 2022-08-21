@@ -3,8 +3,11 @@ package main
 import (
 	"fmt"
 	"github.com/gorilla/mux"
+	"io"
 	"log"
 	"net/http"
+	"net/http/httptest"
+	"testing"
 )
 
 func main() {
@@ -13,7 +16,57 @@ func main() {
 	// 路由中间件
 	//initWeb3()
 	// 处理静态资源
-	initWeb4()
+	//initWeb4()
+	// 处理跨域请求
+	//initWeb5()
+	// 健康检查
+	//intiWeb6()
+}
+
+func intiWeb6(t *testing.T) {
+	r := mux.NewRouter()
+	r.HandleFunc("/health", handHealth)
+	//r.Use(mux.CORSMethodMiddleware(r))
+	//http.ListenAndServe(":8091", r)
+
+	// http接口进行测试
+	req, _ := http.NewRequest("GET", "/health", nil)
+
+	rr := httptest.NewRecorder()
+	r.ServeHTTP(rr, req)
+
+	// 检测状态码
+	if rr.Code != http.StatusOK {
+		t.Error("not ok")
+	}
+
+	// 健康检查结果
+
+	if rr.Body.String() != "alive" {
+		t.Error("not alive")
+	}
+}
+
+func handHealth(writer http.ResponseWriter, request *http.Request) {
+	writer.Header().Set("Content-Type", "application/json")
+	writer.WriteHeader(http.StatusOK)
+	io.WriteString(writer, "alive")
+}
+
+func initWeb5() {
+	r := mux.NewRouter()
+	r.HandleFunc("/cors", handOption).Methods(http.MethodGet, http.MethodPut, http.MethodOptions)
+	r.Use(mux.CORSMethodMiddleware(r))
+	http.ListenAndServe(":8091", r)
+}
+
+func handOption(writer http.ResponseWriter, r *http.Request) {
+	writer.Header().Set("Access-Control-Allow-Methods", "*")
+
+	if r.Method == http.MethodOptions {
+		return
+	}
+	writer.Write([]byte("ycp"))
 }
 
 func initWeb4() {
