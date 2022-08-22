@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+我开始是 {{ . }}
+{{ with "php"}}
+现在是 {{ . }}
+{{ end }}
+
+
+{{ with arg}}
+现在是 {{ . }}
+{{ else }}
+没设置起
+{{ end }}
+
+
+
+
+{{ with ""}}
+现在是 {{ . }}
+{{ else }}
+没设置起
+{{ end }}
+
+</body>
+</html>
