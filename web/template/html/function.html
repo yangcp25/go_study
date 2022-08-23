@@ -5,8 +5,6 @@
     <title>Title</title>
 </head>
 <body>
-{{ range $key, $val := . }}
-<li>{{ $key }} : {{ $val }}</li>
-{{ end}}
+<div> The date/time is {{ . | fdate }} </div>
 </body>
 </html>

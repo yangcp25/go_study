@@ -1,3 +1,4 @@
+{{ define "layout"}}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,8 +6,11 @@
     <title>Title</title>
 </head>
 <body>
-{{ range $key, $val := . }}
-<li>{{ $key }} : {{ $val }}</li>
-{{ end}}
+{{ template "content" .}}
 </body>
 </html>
+{{ end }}
+
+{{ block "content" }}
+Dot is set to arg
+{{ end }}

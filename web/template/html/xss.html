@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>XSS Attack</title>
+</head>
+<body>
+<form action="/xss" method="post">
+    Comment: <input name="comment" type="text" value="{{ . }}" size="32">
+    <hr/>
+    <button id="submit">Submit</button>
+</form>
+<div>Comment: {{ . }}</div>
+</body>
+</html>

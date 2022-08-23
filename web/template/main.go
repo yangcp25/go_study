@@ -19,7 +19,70 @@ func initTemplate() {
 	http.HandleFunc("/rangeArray", rangeArray)
 	http.HandleFunc("/set", setHtml)
 	http.HandleFunc("/tpl", tpl)
+	http.HandleFunc("/pipeline", pipeline)
+	http.HandleFunc("/date_func", date_func)
+	http.HandleFunc("/context", context)
+	http.HandleFunc("/xss", xssAttackExample)
+	http.HandleFunc("/layout", layout)
+	http.HandleFunc("/layout_example", layoutExample)
 	http.ListenAndServe(":8089", nil)
+}
+
+func layoutExample(w http.ResponseWriter, r *http.Request) {
+	rand.Seed(time.Now().Unix())
+	var t *template.Template
+	if rand.Intn(10) > 5 {
+		t = template.Must(template.ParseFiles("html/layout.html", "html/hello_blue.html"))
+	} else {
+		t = template.Must(template.ParseFiles("html/layout.html"))
+	}
+	t.ExecuteTemplate(w, "layout", "")
+}
+
+func layout(w http.ResponseWriter, r *http.Request) {
+	t, _ := template.ParseFiles("html/layout.html", "html/hello.html")
+	t.ExecuteTemplate(w, "layout", "")
+}
+
+func xssAttackExample(w http.ResponseWriter, r *http.Request) {
+	t, _ := template.ParseFiles("html/xss.html")
+	t.Execute(w, template.HTML(r.FormValue("comment")))
+}
+
+func xss(w http.ResponseWriter, r *http.Request) {
+	t := template.Must(template.ParseFiles("html/xss.html"))
+	if r.Method == "GET" {
+		t.Execute(w, nil)
+	} else {
+		t.Execute(w, r.FormValue("comment"))
+	}
+}
+
+func context(w http.ResponseWriter, r *http.Request) {
+	t := template.Must(template.ParseFiles("html/content.html"))
+	content := `I asked: <i>"What's up?"</i>`
+	t.Execute(w, content)
+}
+
+func formateDate(t time.Time) string {
+	layout := "2022年8月23日 20:51:07"
+	return t.Format(layout)
+}
+func date_func(writer http.ResponseWriter, request *http.Request) {
+	funcMap := template.FuncMap{
+		"fdate": formateDate,
+	}
+
+	t := template.New("function.html").Funcs(funcMap)
+
+	t, _ = t.ParseFiles("html/function.html")
+	t.Execute(writer, time.Now())
+}
+
+func pipeline(writer http.ResponseWriter, request *http.Request) {
+	t := template.Must(template.ParseFiles("html/pipiline.html"))
+
+	t.Execute(writer, 12.23)
 }
 
 func tpl(writer http.ResponseWriter, request *http.Request) {
