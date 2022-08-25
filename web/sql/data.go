@@ -7,16 +7,50 @@ import (
 )
 
 func main() {
-	initSql()
+	//initSql()
+	initSql2()
+}
+
+func initSql2() {
+	var err error
+	Db, err = sql.Open("mysql", "root:root@/test?charset=utf8mb4&parseTime=true")
+	if err != nil {
+		panic(err)
+	}
+
+	// 测试
+	post1 := &Post{
+		Title:   "x",
+		Summary: "y",
+		Author:  "yccp",
+	}
+	comments := &Comment{
+		Content: "x2",
+		Author:  "ycp2",
+		Post:    post1,
+	}
+	// 增加
+	err = post1.Create()
+	err = comments.Create()
+	if err != nil {
+		panic(err)
+	}
+
+	// 查询一个
+	test, _ := getPost(post1.Id)
+
+	fmt.Println(test)
+
 }
 
 var Db *sql.DB
 
 type Post struct {
-	Id      int    `json:"id"`
-	Title   string `json:"title"`
-	Summary string `json:"summary"`
-	Author  string `json:"author"`
+	Id       int    `json:"id"`
+	Title    string `json:"title"`
+	Summary  string `json:"summary"`
+	Author   string `json:"author"`
+	Comments []Comment
 }
 
 func initSql() {
@@ -101,6 +135,17 @@ func (post *Post) Create() (err error) {
 func getPost(id int) (post Post, err error) {
 	post = Post{}
 	err = Db.QueryRow("select id, content, author from posts where id = ?", id).Scan(&post.Id, &post.Summary, &post.Author)
+	//关联表
+	comments, _ := Db.Query("select content,author from comments where post_id=?", post.Id)
+
+	for comments.Next() {
+		comment := Comment{}
+		err := comments.Scan(&comment.Content, &comment.Author)
+		if err != nil {
+			panic(err)
+		}
+		post.Comments = append(post.Comments, comment)
+	}
 	return
 }
 
