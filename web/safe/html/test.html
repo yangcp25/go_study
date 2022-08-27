@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Signup</title>
+</head>
+<body>
+<form action="/signup/post" method="post">
+  {{ .csrfField }}
+  <input type="text" name="name">
+  <input type="password" name="password">
+  <hr/>
+  <button id="submit">Submit</button>
+</form>
+</body>
+</html>
