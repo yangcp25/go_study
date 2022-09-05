@@ -1,7 +1,7 @@
 package routes
 
 import (
-	"chichat/hanlder"
+	handlers "chichat/hanlders"
 	"github.com/gorilla/mux"
 	"net/http"
 )
@@ -19,6 +19,7 @@ func NewRouter() *mux.Router {
 			Path(route.Pattern).
 			Name(route.Name).
 			Handler(route.HandlerFunc)
+
 	}
 
 	return router
@@ -40,7 +41,37 @@ var webRoutes = WebRoutes{
 	{
 		"home",
 		"GET",
-		"/",
-		hanlder.Index,
+		"/test2",
+		handlers.Index,
+	},
+	{
+		"signup",
+		"GET",
+		"/signup",
+		handlers.Signup,
+	},
+	{
+		"signupAccount",
+		"POST",
+		"/signup_account",
+		handlers.SignupAccount,
+	},
+	{
+		"login",
+		"GET",
+		"/login",
+		handlers.Login,
+	},
+	{
+		"auth",
+		"POST",
+		"/authenticate",
+		handlers.Authenticate,
+	},
+	{
+		"logout",
+		"GET",
+		"/logout",
+		handlers.Logout,
 	},
 }
