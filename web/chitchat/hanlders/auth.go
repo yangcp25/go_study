@@ -71,5 +71,14 @@ func Logout(writer http.ResponseWriter, request *http.Request) {
 		session := models.Session{Uuid: cookie.Value}
 		session.DeleteByUUID()
 	}
+
+	cookie2 := http.Cookie{
+		Name:     "_cookie",
+		Value:    "",
+		HttpOnly: true,
+		MaxAge:   -1,
+	}
+	http.SetCookie(writer, &cookie2)
+
 	http.Redirect(writer, request, "/", 302)
 }

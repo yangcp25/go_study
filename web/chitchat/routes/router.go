@@ -41,7 +41,7 @@ var webRoutes = WebRoutes{
 	{
 		"home",
 		"GET",
-		"/test2",
+		"/",
 		handlers.Index,
 	},
 	{
@@ -73,5 +73,31 @@ var webRoutes = WebRoutes{
 		"GET",
 		"/logout",
 		handlers.Logout,
+	},
+	// 群组
+	{
+		"newThread",
+		"GET",
+		"/thread/new",
+		handlers.NewThread,
+	},
+	{
+		"createThread",
+		"POST",
+		"/thread/create",
+		handlers.CreateThread,
+	},
+	{
+		"readThread",
+		"GET",
+		"/thread/read",
+		handlers.ReadThread,
+	},
+	// 主题
+	{
+		"postThread",
+		"POST",
+		"/thread/post",
+		handlers.PostThread,
 	},
 }
