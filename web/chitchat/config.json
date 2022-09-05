@@ -1,0 +1,14 @@
+{
+  "App": {
+    "Address": "0.0.0.0:8083",
+    "Static": "public",
+    "Log": "logs"
+  },
+  "Db": {
+    "Driver": "mysql",
+    "Address": "localhost:3306",
+    "Database": "test",
+    "User": "root",
+    "Password": "root"
+  }
+}
