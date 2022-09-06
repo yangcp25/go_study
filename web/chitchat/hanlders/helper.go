@@ -39,7 +39,7 @@ func parseTemplateFiles(filenames ...string) (t *template.Template) {
 	var files []string
 	t = template.New("layout")
 	for _, file := range filenames {
-		files = append(files, fmt.Sprintf("views/%s.html", file))
+		files = append(files, fmt.Sprintf("views/%s/%s.html", config.App.Language, file))
 	}
 	t = template.Must(t.ParseFiles(files...))
 	return
@@ -50,10 +50,12 @@ func generateHTML(writer http.ResponseWriter, data interface{}, filenames ...str
 
 	var files []string
 	for _, file := range filenames {
-		files = append(files, fmt.Sprintf("views/%s.html", file))
+		//files = append(files, fmt.Sprintf("views/%s.html", file))
+		files = append(files, fmt.Sprintf("views/%s/%s.html", config.App.Language, file))
 	}
-
-	templates := template.Must(template.ParseFiles(files...))
+	funcMap := template.FuncMap{"fdate": formatDate}
+	t := template.New("layout").Funcs(funcMap)
+	templates := template.Must(t.ParseFiles(files...))
 	templates.ExecuteTemplate(writer, "layout", data)
 }
 
