@@ -8,6 +8,7 @@ import (
 	"github.com/nicksnyder/go-i18n/v2/i18n"
 	"html/template"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 )
@@ -17,9 +18,10 @@ var localizer *i18n.Localizer
 
 func init() {
 	// 获取全局配置实例
-	config = LoadConfig()
 	// 获取本地化实例
-	localizer = i18n.NewLocalizer(config.LocaleBundle, config.App.Language)
+	//localizer = i18n.NewLocalizer(config.LocaleBundle, config.App.Language)
+	localizer = i18n.NewLocalizer(ViperConfig.LocaleBundle, ViperConfig.App.Language)
+	os.OpenFile(ViperConfig.App.Log+"/chitchat.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 }
 
 // 通过 Cookie 判断用户是否已登录
@@ -51,7 +53,8 @@ func generateHTML(writer http.ResponseWriter, data interface{}, filenames ...str
 	var files []string
 	for _, file := range filenames {
 		//files = append(files, fmt.Sprintf("views/%s.html", file))
-		files = append(files, fmt.Sprintf("views/%s/%s.html", config.App.Language, file))
+		//files = append(files, fmt.Sprintf("views/%s/%s.html", config.App.Language, file))
+		files = append(files, fmt.Sprintf("views/%s/%s.html", ViperConfig.App.Language, file))
 	}
 	funcMap := template.FuncMap{"fdate": formatDate}
 	t := template.New("layout").Funcs(funcMap)

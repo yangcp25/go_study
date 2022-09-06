@@ -13,9 +13,10 @@ var Db *sql.DB
 
 func init() {
 	var err error
-	config := LoadConfig() // 加载全局配置实例
-	source := fmt.Sprintf("%s:%s@(%s)/%s?charset=utf8mb4&parseTime=true", config.Db.User, config.Db.Password, config.Db.Address, config.Db.Database)
-	Db, err = sql.Open("mysql", source)
+	driver := ViperConfig.Db.Driver
+	source := fmt.Sprintf("%s:%s@(%s)/%s?charset=utf8&parseTime=true", ViperConfig.Db.User, ViperConfig.Db.Password,
+		ViperConfig.Db.Address, ViperConfig.Db.Database)
+	Db, err = sql.Open(driver, source)
 	if err != nil {
 		panic(err)
 	}
