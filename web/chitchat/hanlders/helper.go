@@ -1,13 +1,26 @@
 package handlers
 
 import (
+	. "chichat/config"
 	"chichat/models"
 	"errors"
 	"fmt"
+	"github.com/nicksnyder/go-i18n/v2/i18n"
 	"html/template"
 	"net/http"
 	"strings"
+	"time"
 )
+
+var config *Configuration
+var localizer *i18n.Localizer
+
+func init() {
+	// 获取全局配置实例
+	config = LoadConfig()
+	// 获取本地化实例
+	localizer = i18n.NewLocalizer(config.LocaleBundle, config.App.Language)
+}
 
 // 通过 Cookie 判断用户是否已登录
 func session(writer http.ResponseWriter, request *http.Request) (sess models.Session, err error) {
@@ -54,7 +67,7 @@ func info(args ...interface{}) {
 	logger.Println(args...)
 }
 
-// 为什么不命名为 error？避免和 error 类型重名
+// 日志相关
 func danger(args ...interface{}) {
 	logger.SetPrefix("ERROR ")
 	logger.Println(args...)
@@ -66,7 +79,13 @@ func warning(args ...interface{}) {
 }
 
 // 异常处理统一重定向到错误页面
-func error_message(writer http.ResponseWriter, request *http.Request, msg string) {
+func errorMessage(writer http.ResponseWriter, request *http.Request, msg string) {
 	url := []string{"/err?msg=", msg}
 	http.Redirect(writer, request, strings.Join(url, ""), 302)
+}
+
+// 日期格式化
+func formatDate(t time.Time) string {
+	datetime := "2006-01-02 15:04:05"
+	return t.Format(datetime)
 }
