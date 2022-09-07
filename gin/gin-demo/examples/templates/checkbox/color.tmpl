@@ -1,0 +1,17 @@
+{{ define "checkbox/color.tmpl" }}
+<html>
+  <h1>
+    {{ .title }}
+  </h1>
+  <form action="/colors" method="POST">
+    <p>选择颜色</p>
+    <label for="red">红</label>
+    <input type="checkbox" name="colors[]" value="red" id="red">
+    <label for="green">绿</label>
+    <input type="checkbox" name="colors[]" value="green" id="green">
+    <label for="blue">蓝</label>
+    <input type="checkbox" name="colors[]" value="blue" id="blue">
+    <input type="submit" value="提交">
+  </form>
+</html>
+{{ end }}
