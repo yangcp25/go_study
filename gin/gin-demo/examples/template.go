@@ -27,7 +27,7 @@ func loadTemplate() (*template.Template, error) {
 	return t, nil
 }
 
-func main() {
+func test() {
 	r := gin.New()
 	t, err := loadTemplate()
 	if err != nil {

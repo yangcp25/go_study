@@ -1,20 +1,126 @@
 package main
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
+	"github.com/go-playground/validator/v10"
 	"log"
 	"net/http"
 	"time"
 )
 
-/*func main() {
+func main() {
 	//defaultFunc()
 	// 绑定结构体
 	//bindStruct()
 	//bindFormCheckBox()
 	//bindPerson()
-	bindUrl()
-}*/
+	//bindUrl()
+	//bindCustomize()
+	//createLog()
+	//bindFormValidate()
+	bindGo()
+}
+
+func bindGo() {
+	router := gin.Default()
+	// 使用协程需要拷贝 因为是全局变量要避免污染
+	router.GET("/test1", func(context *gin.Context) {
+		cgo := context.Copy()
+
+		go func() {
+			time.Sleep(1 * time.Second)
+			fmt.Println(cgo.Request.URL.Path)
+		}()
+	})
+	router.GET("/test2", func(context *gin.Context) {
+		cgo := context.Copy()
+		fmt.Println(cgo.Request.URL.Path)
+	})
+	router.Run()
+}
+
+type Form struct {
+	CheckIn  time.Time `form:"check_in" binding:"required,validateCheckIn" time_format:"2006-01-02"`
+	CheckOut time.Time `form:"check_out" binding:"required,gtfield=CheckIn" time_format:"2006-01-02"`
+}
+
+var validateCheckIn validator.Func = func(fl validator.FieldLevel) bool {
+	date, ok := fl.Field().Interface().(time.Time)
+
+	if ok {
+		now := time.Now()
+		if now.After(date) {
+			return false
+		}
+	}
+	return true
+}
+
+func getDataForm(context *gin.Context) {
+	var f Form
+	if err := context.ShouldBindWith(&f, binding.Query); err == nil {
+		context.JSON(http.StatusOK, gin.H{
+			"message": "输入有效！",
+		})
+	} else {
+		context.JSON(http.StatusBadRequest, gin.H{
+			"message": "输入无效！",
+			"err":     err.Error(),
+		})
+	}
+}
+
+func bindFormValidate() {
+	router := gin.Default()
+
+	// 注册自定义验证规则
+	validatorObj, ok := binding.Validator.Engine().(*validator.Validate)
+
+	if ok {
+		validatorObj.RegisterValidation("validateCheckIn", validateCheckIn)
+	}
+	router.GET("/validate", getDataForm)
+	router.Run()
+}
+
+func createLog() {
+	router := gin.New()
+	router.Use(gin.LoggerWithFormatter(func(param gin.LogFormatterParams) string {
+		// 自定义日志输出格式
+		return fmt.Sprintf("%s - [%s] \"%s %s %s %d %s \"%s\" %s\"\n",
+			param.ClientIP,
+			param.TimeStamp.Format(time.RFC1123),
+			param.Method,
+			param.Path,
+			param.Request.Proto,
+			param.StatusCode,
+			param.Latency,
+			param.Request.UserAgent(),
+			param.ErrorMessage,
+		)
+	}))
+	// 使用 recovery 中间件
+	router.Use(gin.Recovery())
+	router.GET("/ping", func(c *gin.Context) {
+		c.String(200, "pong")
+	})
+	router.Run(":8080")
+}
+
+func bindCustomize() {
+	router := gin.Default()
+
+	s := &http.Server{
+		Addr:           ":8080",
+		Handler:        router,
+		ReadTimeout:    10 * time.Second,
+		WriteTimeout:   10 * time.Second,
+		MaxHeaderBytes: 1 << 20,
+	}
+	s.ListenAndServe()
+}
 
 type Student struct {
 	ID   string `uri:"id" binding:"required,uuid"`
