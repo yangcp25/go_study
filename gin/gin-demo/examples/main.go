@@ -5,8 +5,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
+	"io"
 	"log"
 	"net/http"
+	"os"
 	"time"
 )
 
@@ -20,7 +22,71 @@ func main() {
 	//bindCustomize()
 	//createLog()
 	//bindFormValidate()
-	bindGo()
+	//bindGo()
+	// 路由分组
+	//ginRouteGroup()
+	// 日志文件写入文件
+	logInFile()
+}
+
+func logInFile() {
+	gin.DisableConsoleColor()
+
+	f, _ := os.Create("log.File")
+
+	gin.DefaultWriter = io.MultiWriter(f)
+	//同时写入文件和输出日志
+	//gin.DefaultWriter = io.MultiWriter(f, os.Stdout)
+
+	ginWeb := gin.Default()
+
+	ginWeb.GET("/ping", func(context *gin.Context) {
+		fmt.Println("pong")
+	})
+	ginWeb.Run(":8080")
+}
+
+func ginRouteGroup() {
+	ginWeb := gin.New()
+
+	v1 := ginWeb.Group("v1")
+	{
+		v1.GET("login", doLogin)
+		v1.GET("submit", doSubmit)
+		v1.GET("loginOut", doLoginOut)
+	}
+
+	v2 := ginWeb.Group("v2")
+	{
+		v2.POST("login", doLoginV2)
+		v2.POST("submit", doSubmitV2)
+		v2.POST("loginOut", doLoginOutV2)
+	}
+	ginWeb.Run(":8080")
+}
+
+func doLoginOutV2(context *gin.Context) {
+	fmt.Println("v2:loginOut")
+}
+
+func doSubmitV2(context *gin.Context) {
+	fmt.Println("v2:submit")
+}
+
+func doLoginV2(context *gin.Context) {
+	fmt.Println("v2:login")
+}
+
+func doLoginOut(context *gin.Context) {
+	fmt.Println("loginOut")
+}
+
+func doSubmit(context *gin.Context) {
+	fmt.Println("submit")
+}
+
+func doLogin(context *gin.Context) {
+	fmt.Println("login")
 }
 
 func bindGo() {
