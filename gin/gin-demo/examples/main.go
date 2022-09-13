@@ -2,9 +2,11 @@ package main
 
 import (
 	"fmt"
+	"github.com/fvbock/endless"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
+	"html/template"
 	"io"
 	"log"
 	"net/http"
@@ -26,7 +28,91 @@ func main() {
 	// 路由分组
 	//ginRouteGroup()
 	// 日志文件写入文件
-	logInFile()
+	//logInFile()
+	// 模板引擎
+	//parseHtml()
+	// 自定义模板
+	//parseCustomHtml()
+	//createHttp2()
+	//平滑重启或关闭服务器
+	shotDownHttp()
+}
+
+func shotDownHttp() {
+	ginWeb := gin.Default()
+
+	err := endless.ListenAndServe(":4242", ginWeb)
+	if err != nil {
+		panic(err)
+	}
+}
+
+var html = template.Must(template.New("http2-push").Parse(`
+    <html>
+    <head>
+      <title>Https Test</title>
+      <script src="/assets/app.js"></script>
+    </head>
+    <body>
+      <h1 style="color:red;">Welcome, Ginner!</h1>
+    </body>
+    </html>
+    `))
+
+func createHttp2() {
+	r := gin.Default()
+	r.Static("/assets", "./assets")
+	r.SetHTMLTemplate(html)
+
+	r.GET("/", func(c *gin.Context) {
+		if pusher := c.Writer.Pusher(); pusher != nil {
+			// use pusher.Push() to do server push
+			if err := pusher.Push("/assets/app.js", nil); err != nil {
+				log.Printf("Failed to push: %v", err)
+			}
+		}
+		c.HTML(200, "http2-push", gin.H{
+			"status": "success",
+		})
+	})
+
+	// Listen and Server in http://127.0.0.1:8085
+	r.Run(":8085")
+}
+
+func parseCustomHtml() {
+	ginWeb := gin.Default()
+
+	ginWeb.Delims("[[", "]]")
+
+	ginWeb.SetFuncMap(template.FuncMap{
+		"formateDate": formateDate,
+	})
+	ginWeb.LoadHTMLGlob("templates/**/*")
+	ginWeb.GET("/ping", func(context *gin.Context) {
+		context.HTML(http.StatusOK, "file1.html", map[string]interface{}{
+			"date": time.Date(2020, 1, 8, 0, 0, 0, 0, time.UTC),
+		})
+	})
+	ginWeb.Run(":8080")
+}
+
+func formateDate(t time.Time) string {
+	year, month, day := t.Date()
+	return fmt.Sprintf("%d%02d%02d", year, month, day)
+}
+
+func parseHtml() {
+	ginWeb := gin.Default()
+
+	ginWeb.LoadHTMLGlob("templates/**/*")
+
+	ginWeb.GET("/html", func(context *gin.Context) {
+		context.HTML(http.StatusOK, "html/index.tmpl", gin.H{
+			"title": "测试",
+		})
+	})
+	ginWeb.Run(":8080")
 }
 
 func logInFile() {
