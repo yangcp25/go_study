@@ -1,16 +1,21 @@
 package main
 
 import (
+	"context"
 	"fmt"
-	"github.com/fvbock/endless"
+	"github.com/gin-gonic/autotls"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
+	"golang.org/x/crypto/acme/autocert"
+	"golang.org/x/sync/errgroup"
 	"html/template"
 	"io"
 	"log"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
 	"time"
 )
 
@@ -35,16 +40,389 @@ func main() {
 	//parseCustomHtml()
 	//createHttp2()
 	//平滑重启或关闭服务器
-	shotDownHttp()
+	//shotDownHttp()
+	// jsonp
+	//createJsonP()
+	//form
+	// 获取字典数据
+	//formMap()
+	// 绑定结构体
+	//bindStructData()
+	//
+	//test2()
+	//运行多个服务器
+	//test3()
+	//下载文件
+	//downFile()
+	//资源文件
+	//staticFile()
+	//cookie
+	//setCookie()
+	// 自定义证书
+	//autotlFunc()
+	part2()
+}
+
+func autotlFunc() {
+	r := gin.Default()
+
+	// Ping handler
+	r.GET("/ping", func(c *gin.Context) {
+		c.String(200, "pong")
+	})
+
+	m := autocert.Manager{
+		Prompt:     autocert.AcceptTOS,
+		HostPolicy: autocert.HostWhitelist("example1.com", "example2.com"),
+		Cache:      autocert.DirCache("/var/www/.cache"),
+	}
+
+	log.Fatal(autotls.RunWithManager(r, &m))
+}
+
+func setCookie() {
+	router := gin.Default()
+	router.GET("/cookie", func(c *gin.Context) {
+		cookie, err := c.Cookie("ycp_token")
+		if err != nil {
+			cookie = "empty"
+			c.SetCookie("ycp_token", "123", 3600, "/", "127.0.0.1", false, true)
+		}
+
+		fmt.Println(cookie)
+	})
+	router.Run()
+}
+
+func staticFile() {
+	router := gin.Default()
+	router.Static("/assets", "./assets")
+	router.StaticFS("/more_static", http.Dir("my_file_system"))
+	router.StaticFile("/favicon.ico", "./resources/favicon.ico")
+	router.Run()
+}
+
+func downFile() {
+	e := gin.Default()
+	e.GET("/dataFromReader", func(c *gin.Context) {
+		response, err := http.Get("https://laravel.gstatics.cn/storage/uploads/images/cover_page/2020-08/thumbs-850-350/cvBgin-logo.jpg")
+		if err != nil || response.StatusCode != http.StatusOK {
+			c.Status(http.StatusServiceUnavailable)
+			return
+		}
+
+		reader := response.Body
+		contentLength := response.ContentLength
+		contentType := response.Header.Get("Content-Type")
+
+		extraHeaders := map[string]string{
+			"Content-Disposition": `attachment; filename="gopher.png"`,
+		}
+
+		c.DataFromReader(http.StatusOK, contentLength, contentType, reader, extraHeaders)
+	})
+	e.GET("/file", func(c *gin.Context) {
+		c.Writer.Header().Add("Content-Disposition", fmt.Sprintf("attachment; filename=%s", "test")) //fmt.Sprintf("attachment; filename=%s", filename)对下载的文件重命名
+		c.Writer.Header().Add("Content-Type", "application/octet-stream")
+		c.File("H:\\code\\go\\go_study\\gin\\gin-demo\\examples\\log.File")
+	})
+	e.Run()
+}
+
+var (
+	g errgroup.Group
+)
+
+func router01() http.Handler {
+	e := gin.New()
+	e.Use(gin.Recovery())
+	e.GET("/", func(c *gin.Context) {
+		c.JSON(
+			http.StatusOK,
+			gin.H{
+				"code":  http.StatusOK,
+				"error": "Welcome server 01",
+			},
+		)
+	})
+
+	e.GET("/someJSON", func(c *gin.Context) {
+		names := []string{"lena", "austin", "foo"}
+
+		// Will output  :   while(1);["lena","austin","foo"]
+		c.SecureJSON(http.StatusOK, names)
+	})
+
+	return e
+}
+
+func router02() http.Handler {
+	e := gin.New()
+	e.Use(gin.Recovery())
+	e.GET("/", func(c *gin.Context) {
+		c.JSON(
+			http.StatusOK,
+			gin.H{
+				"code":  http.StatusOK,
+				"error": "Welcome server 02",
+			},
+		)
+	})
+
+	return e
+}
+func test3() {
+	server01 := &http.Server{
+		Addr:         ":8080",
+		Handler:      router01(),
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 10 * time.Second,
+	}
+
+	server02 := &http.Server{
+		Addr:         ":8081",
+		Handler:      router02(),
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 10 * time.Second,
+	}
+
+	g.Go(func() error {
+		return server01.ListenAndServe()
+	})
+
+	g.Go(func() error {
+		return server02.ListenAndServe()
+	})
+
+	if err := g.Wait(); err != nil {
+		log.Fatal(err)
+	}
+}
+
+func test2() {
+	r := gin.Default()
+
+	// HTTP 重定向
+	r.GET("/test", func(c *gin.Context) {
+		fmt.Println("in test")
+		c.Redirect(http.StatusMovedPermanently, "https://www.xueyuanjun.com/")
+	})
+
+	// 路由重定向
+	r.GET("/test1", func(c *gin.Context) {
+		c.Request.URL.Path = "/test"
+		r.HandleContext(c)
+	})
+
+	// 查询字符串参数使用已存在的底层请求对象进行解析
+	// 示例请求 URL:  /welcome?firstname=Jane&lastname=Doe
+	r.GET("/welcome", func(c *gin.Context) {
+		firstname := c.DefaultQuery("firstname", "Guest")
+		lastname := c.Query("lastname") // 底层调用的是 c.Request.URL.Query().Get("lastname")
+
+		c.String(http.StatusOK, "Hello %s %s", firstname, lastname)
+	})
+
+	r.POST("/post", func(c *gin.Context) {
+		id := c.Query("id")                 // 查询字符串
+		page := c.DefaultQuery("page", "0") // 查询字符串（带默认值）
+		name := c.PostForm("name")          //  POST 表单数据
+		message := c.PostForm("message")    //  同上
+
+		fmt.Printf("id: %s; page: %s; name: %s; message: %s", id, page, name, message)
+	})
+
+	// Serves unicode entities
+	r.GET("/json", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"html": "<b>Hello, world!</b>",
+		})
+	})
+
+	// Serves literal characters
+	r.GET("/purejson", func(c *gin.Context) {
+		c.PureJSON(200, gin.H{
+			"html": "<b>Hello, world!</b>",
+		})
+	})
+
+	// listen and serve on 0.0.0.0:8080
+	r.Run()
+}
+
+type NameLogin struct {
+	Name     string `from:"user" json:"user" xml:"user" binding:"required"`
+	Password string `from:"password" json:"password" xml:"password" binding:"required"`
+}
+
+func bindStructData() {
+	ginWeb := gin.Default()
+
+	// This handler will match /user/xueyuanjun but will not match /user/ or /user
+	ginWeb.Any("/user/:name", func(c *gin.Context) {
+		name := c.Param("name")
+		c.String(http.StatusOK, "Hello %s", name)
+	})
+
+	// However, this one will match /user/xueyuanjun/ and also /user/xueyuanjun/send
+	// If no other routers match /user/xueyuanjun, it will redirect to /user/xueyuanjun/
+	ginWeb.Any("/user/:name/*action", func(c *gin.Context) {
+		name := c.Param("name")
+		action := c.Param("action")
+		message := name + " is " + action
+		c.String(http.StatusOK, message)
+	})
+
+	ginWeb.Any("/testing", startPageF)
+
+	ginWeb.POST("login_s", func(c *gin.Context) {
+		var nameLogin NameLogin
+		err := c.ShouldBindJSON(&nameLogin)
+		if err != nil {
+			fmt.Println(err.Error())
+			return
+		}
+
+		if nameLogin.Name != "ycp" || nameLogin.Password != "123456" {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"msg": "登录失败",
+			})
+		}
+		c.JSON(http.StatusOK, gin.H{
+			"msg": "登录成功",
+		})
+	})
+	ginWeb.POST("loginByXml", func(c *gin.Context) {
+		var nameLogin NameLogin
+		err := c.ShouldBindXML(&nameLogin)
+		if err != nil {
+			fmt.Println(err.Error())
+			return
+		}
+		if nameLogin.Name != "ycp" || nameLogin.Password != "123456" {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"msg": "登录失败",
+			})
+		}
+		c.JSON(http.StatusOK, gin.H{
+			"msg": "登录成功",
+		})
+	})
+
+	ginWeb.POST("loginByForm", func(c *gin.Context) {
+		var nameLogin NameLogin
+		err := c.ShouldBind(&nameLogin)
+		if err != nil {
+			fmt.Println(err.Error())
+			return
+		}
+		if nameLogin.Name != "ycp" || nameLogin.Password != "123456" {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"msg": "登录失败",
+			})
+		} else {
+			c.JSON(http.StatusOK, gin.H{
+				"msg": "登录成功",
+			})
+		}
+	})
+	ginWeb.POST("/login", func(c *gin.Context) {
+		// you can bind multipart form with explicit binding declaration:
+		// c.ShouldBindWith(&form, binding.Form)
+		// or you can simply use autobinding with ShouldBind method:
+		var form NameLogin
+		// in this case proper binding will be automatically selected
+		if c.ShouldBind(&form) == nil {
+			if form.Name == "xueyuanjun" && form.Password == "123456" {
+				c.JSON(200, gin.H{"status": "you are logged in"})
+			} else {
+				c.JSON(401, gin.H{"status": "unauthorized"})
+			}
+		}
+	})
+	ginWeb.Run()
+}
+
+func startPageF(c *gin.Context) {
+	var person Person
+	if c.ShouldBindQuery(&person) == nil {
+		log.Println("====== Only Bind By Query String ======")
+		log.Println(person.Name)
+		log.Println(person.Address)
+	}
+	c.String(200, "Success")
+}
+
+func formMap() {
+	r := gin.Default()
+
+	r.POST("/form", func(c *gin.Context) {
+		queryData := c.QueryMap("ids")
+		formData := c.PostFormMap("test2")
+		data := map[string]interface{}{
+			"name": "ycp",
+		}
+
+		fmt.Println(queryData)
+		fmt.Println(formData)
+		c.JSONP(http.StatusOK, data)
+	})
+
+	r.Run()
+}
+
+func createJsonP() {
+	r := gin.Default()
+
+	r.GET("/jsonp", func(c *gin.Context) {
+		data := map[string]interface{}{
+			"name": "ycp",
+		}
+
+		//如果传递的查询字符串 callback=hello
+		//则输出：hello({\"name\":\"学院君\"})
+		c.JSONP(http.StatusOK, data)
+	})
+
+	r.Run()
 }
 
 func shotDownHttp() {
-	ginWeb := gin.Default()
+	router := gin.Default()
+	router.GET("/", func(c *gin.Context) {
+		time.Sleep(5 * time.Second)
+		c.String(http.StatusOK, "Welcome Gin Server")
+	})
 
-	err := endless.ListenAndServe(":4242", ginWeb)
-	if err != nil {
-		panic(err)
+	srv := &http.Server{
+		Addr:    ":8080",
+		Handler: router,
 	}
+
+	go func() {
+		// service connections
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("listen: %s\n", err)
+		}
+	}()
+
+	quit := make(chan os.Signal)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	c := <-quit
+	fmt.Println(c)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+
+	defer cancel()
+	err := srv.Shutdown(ctx)
+	if err != nil {
+		return
+	}
+	select {
+	case <-ctx.Done():
+		log.Println("5秒过后")
+	}
+	log.Println("服务器已退出")
 }
 
 var html = template.Must(template.New("http2-push").Parse(`
