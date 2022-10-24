@@ -72,7 +72,7 @@ func (linkedList *linkedList) insertNodeByValue(v interface{}, searchVal interfa
 	for nodeData.next != nil {
 		if nodeData.next.data == searchVal {
 			newNode := createNode(v, nodeData.next.next)
-			nodeData.next = newNode
+			nodeData.next.next = newNode
 			return true
 		}
 		nodeData = nodeData.next
@@ -126,6 +126,8 @@ func main() {
 	linkedListOne.insertNode(1)
 	linkedListOne.insertNode(2)
 	linkedListOne.insertNode(3)
-	fmt.Printf("删除数据3\n")
-	linkedListOne.removeNode(3)
+
+	linkedListOne.insertNodeByValue(9, 1)
+
+	linkedListOne.rangeNode()
 }

@@ -62,6 +62,5 @@ func test1() {
 	fmt.Printf("%v \n", *b)
 	fmt.Printf("%v \n", b.data)
 	fmt.Printf("%v \n", c)
-
 	//
 }
