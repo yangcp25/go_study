@@ -30,12 +30,8 @@ func (u *Users) Insert(userObj interface{}) error {
 func (u *Users) Find() bool {
 	var o orm.Ormer
 	o = orm.NewOrm()
-	user := Users{
-		Email:    u.Email,
-		Password: u.Password,
-	}
-	err := o.Read(user)
-	if err == orm.ErrNoRows {
+	err := o.Read(u)
+	if err != orm.ErrNoRows {
 		return false
 	}
 	return true
