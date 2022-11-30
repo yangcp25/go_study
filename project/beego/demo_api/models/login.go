@@ -10,7 +10,7 @@ type Users struct {
 	Name            string    `json:"name" orm:"column(name)"`
 	Email           string    `json:"email" orm:"column(email)"`
 	EmailVerifiedAt time.Time `orm:"column(email_verified_at);auto_now;type(datetime)"`
-	Password        string    `orm:"column(password)"`
+	Password        string    `json:"password" orm:"column(password)"`
 	RememberToken   string    `json:"remember_token" orm:"column(remember_token)"`
 	CreatedAt       time.Time `orm:"column(created_at);auto_now_add;type(datetime)"`
 	UpdatedAt       time.Time `orm:"column(updated_at);auto_now;type(datetime)"`
@@ -25,4 +25,18 @@ func (u *Users) Insert(userObj interface{}) error {
 	o = orm.NewOrm()
 	_, err := o.Insert(userObj)
 	return err
+}
+
+func (u *Users) Find() bool {
+	var o orm.Ormer
+	o = orm.NewOrm()
+	user := Users{
+		Email:    u.Email,
+		Password: u.Password,
+	}
+	err := o.Read(user)
+	if err == orm.ErrNoRows {
+		return false
+	}
+	return true
 }
