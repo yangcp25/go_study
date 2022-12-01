@@ -31,12 +31,11 @@ func (ctrl *LoginController) Login() {
 	json.Unmarshal(data, &req)
 
 	logs.Info("%v", req)
-	models := models.Users{
-		Email:    req["email"],
-		Password: req["password"],
+	id, name := models.FindUser(req["email"], req["password"])
+	if id > 0 {
+		ctrl.Data["json"] = ReturnSuccess(0, "登录成功！", map[string]interface{}{"uid": id, "name": name}, 0)
+	} else {
+		ctrl.Data["json"] = ReturnError(7001, "登录失败！")
 	}
-	res := models.Find()
-	logs.Info("%v", res)
-	ctrl.Data["json"] = req
 	ctrl.ServeJSON()
 }

@@ -27,12 +27,16 @@ func (u *Users) Insert(userObj interface{}) error {
 	return err
 }
 
-func (u *Users) Find() bool {
+func FindUser(email string, password string) (int64, string) {
 	var o orm.Ormer
 	o = orm.NewOrm()
-	err := o.Read(u)
-	if err != orm.ErrNoRows {
-		return false
+
+	var user Users
+	err := o.QueryTable("users").Filter("email", email).Filter("password", password).One(&user)
+	if err == orm.ErrNoRows {
+		return 0, ""
+	} else if err == orm.ErrMissPK {
+		return 0, ""
 	}
-	return true
+	return user.Id, user.Name
 }
