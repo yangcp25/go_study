@@ -3,7 +3,6 @@ package controllers
 import (
 	"demo_api/models"
 	"encoding/json"
-	"github.com/beego/beego/v2/core/logs"
 	beego "github.com/beego/beego/v2/server/web"
 )
 
@@ -30,7 +29,6 @@ func (ctrl *LoginController) Login() {
 	data := ctrl.Ctx.Input.RequestBody //在RequestBody中读取Json
 	json.Unmarshal(data, &req)
 
-	logs.Info("%v", req)
 	id, name := models.FindUser(req["email"], req["password"])
 	if id > 0 {
 		ctrl.Data["json"] = ReturnSuccess(0, "登录成功！", map[string]interface{}{"uid": id, "name": name}, 0)
