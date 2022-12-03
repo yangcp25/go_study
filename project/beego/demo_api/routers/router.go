@@ -28,4 +28,6 @@ func init() {
 	)
 	beego.AddNamespace(ns)
 	beego.AutoRouter(&controllers.LoginController{})
+	beego.AutoRouter(&controllers.CommentsController{})
+	beego.AutoRouter(&controllers.RedisTestController{})
 }
