@@ -10,7 +10,15 @@ func main() {
 	//test1()
 	//t := test2()
 	//fmt.Printf("%v\n", &t.data)
-	test4()
+	//test4()
+	testDefer()
+}
+
+func testDefer() int {
+	var i = 0
+	i++
+	defer fmt.Printf("%d", i)
+	return i
 }
 
 func test4() {

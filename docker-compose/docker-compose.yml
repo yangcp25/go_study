@@ -1,0 +1,25 @@
+version: '3'
+services:
+  rabbitmq:
+    image: rabbitmq:latest
+    container_name: rabbitmq
+    restart: always
+    hostname: rabbitmq_host
+    ports:
+      - 4369:4369   #
+      - 5671:5671   #
+      - 5672:5672	# 生产者和消费者连接使用的接口
+      - 15672:15672   # web UI 管理接口
+    volumes:
+      - ./data:/var/lib/rabbitmq #挂载 RabbitMQ数据
+    environment:
+      - RABBITMQ_DEFAULT_USER=root
+      - RABBITMQ_DEFAULT_PASS=root
+    stdin_open: true
+    tty: true
+    command: /bin/bash
+    networks:
+      - mynet
+networks:
+    mynet:
+      external: true
