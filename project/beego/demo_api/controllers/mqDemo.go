@@ -85,3 +85,27 @@ func (ctrl *MqDemoController) TestTopicTwo() {
 	}()
 	ctrl.Ctx.WriteString("TestTopicTwo")
 }
+
+func (ctrl *MqDemoController) TestDlx() {
+	go func() {
+		count := 0
+		for {
+			mq.PublishDlx("ycp_dlx.test.a", "ycp_dlx_a"+strconv.Itoa(count))
+			count++
+			time.Sleep(1 * time.Second)
+		}
+	}()
+	ctrl.Ctx.WriteString("dlx")
+}
+
+func (ctrl *MqDemoController) TestDlxTwo() {
+	go func() {
+		count := 0
+		for {
+			mq.PublishEx("ycp_dlx.test.b", "fanout", "", "ycp_dlx_b"+strconv.Itoa(count))
+			count++
+			time.Sleep(1 * time.Second)
+		}
+	}()
+	ctrl.Ctx.WriteString("dlx_two")
+}

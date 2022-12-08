@@ -20,7 +20,7 @@ func main() {
 	//
 	//test6()
 	// 协程
-	//test1()
+	test1()
 	// 使用channel 传递消息
 	//test2()
 
