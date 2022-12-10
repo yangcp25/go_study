@@ -65,7 +65,7 @@ func (receiver dataBuff) read(i int) {
 					fmt.Printf("%d:%s\n", i, data)
 				}
 				// 阻塞协程等待下次通知
-				receiver.Cond.Wait()
+				receiver.Cond.Wait() // wait 操作会打开读锁，在初始化的时候会传入读锁，所以写入器可以获取写锁
 				data = data[:0]
 				continue
 			}

@@ -12,7 +12,8 @@ import (
 func main() {
 
 	// for 里面使用通道
-	test9()
+	test10()
+	//test9()
 	// 避免关闭已经关闭的通道
 	//test8()
 	// 超时机制实现
@@ -20,7 +21,7 @@ func main() {
 	//
 	//test6()
 	// 协程
-	test1()
+	//test1()
 	// 使用channel 传递消息
 	//test2()
 
@@ -33,6 +34,19 @@ func main() {
 	// 单向通道：是指程序上规定通信的方向不是语言层面上的限制；语言上始终支持发送和接收
 	//test5()
 	//
+}
+
+func test10() {
+	ch := make(chan int)
+
+	select {
+	case num := <-ch:
+		fmt.Printf("随机数：%d\n", num)
+	}
+
+	ch <- 2 // 无缓冲通道在未读取数据之前会一直阻塞
+
+	fmt.Println("xx")
 }
 
 func test9() {

@@ -31,4 +31,5 @@ func init() {
 	beego.AutoRouter(&controllers.CommentsController{})
 	beego.AutoRouter(&controllers.RedisTestController{})
 	beego.AutoRouter(&controllers.MqDemoController{})
+	beego.AutoRouter(&controllers.ChannelDemoController{})
 }
