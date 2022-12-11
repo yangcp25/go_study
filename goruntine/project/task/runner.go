@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"task/runner"
@@ -9,11 +10,11 @@ import (
 
 func main() {
 	fmt.Print("来了的\n")
-	task := runner.New(3 * time.Second)
+	ctx, cancelFun := context.WithCancel(context.Background())
+	task := runner.New(3*time.Second, cancelFun)
 
-	task.Add(taskFunc(), taskFunc(), taskFunc())
+	task.Add(taskFunc(), taskFunc(), taskFunc(), taskFunc(), taskFunc(), taskFunc(), taskFunc())
 	err := task.Start()
-	//fmt.Printf("%v", err)
 	if err != nil {
 		switch err {
 		case runner.ErrorTimeOut:
@@ -24,11 +25,23 @@ func main() {
 			os.Exit(2)
 		}
 	}
+	<-ctx.Done()
+	fmt.Println("\nfinished")
 }
 
-func taskFunc() func(int) {
-	return func(i int) {
-		fmt.Printf("任务：%d顺利执行！\n", i)
+func taskFunc() func(int, func()) {
+	return func(i int, funcDone func()) {
+		date := getDateTime()
 		time.Sleep(time.Duration(i) * time.Second)
+		fmt.Printf(date+";任务：%d顺利执行！\n", i)
+		if i == 6 {
+			funcDone()
+		}
 	}
+}
+
+func getDateTime() string {
+	timestamp := time.Now().Unix()
+	tm := time.Unix(timestamp, 0)
+	return tm.Format("2006-01-02 03:04:05")
 }

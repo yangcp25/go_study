@@ -77,3 +77,40 @@ func add2(i int, c chan int) {
 	time.Sleep(time.Duration(rand.Intn(2)) * time.Second)
 	c <- i
 }
+
+// 使用协程和channel 实现任务池
+func (c *ChannelDemoController) TestTask() {
+	taskChannel := make(chan int, 10)
+	handleChannel := make(chan int, 10)
+	resChannel := make(chan bool, 5)
+	// 创建任务
+	go func() {
+		for i := 0; i < 5; i++ {
+			taskChannel <- i
+		}
+	}()
+	// 处理任务
+	for i := 0; i < 5; i++ {
+		go handTask(taskChannel, handleChannel, resChannel)
+	}
+	// 关闭任务
+	go func() {
+		for i := 0; i < 5; i++ {
+			<-resChannel
+		}
+		close(resChannel)
+		close(handleChannel)
+	}()
+
+	for i := range handleChannel {
+		fmt.Println("处理结果:", i)
+	}
+
+}
+
+func handTask(taskChannel chan int, handleChannel chan int, resChannel chan bool) {
+	for i := range taskChannel {
+		handleChannel <- i
+	}
+	resChannel <- true
+}

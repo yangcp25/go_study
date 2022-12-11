@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-// 需要一个结构体存放任务
+// ErrorTimeOut 需要一个结构体存放任务
 // (1)接收是否中断的系统信号 (2)系统中断的错误类型 （3）超时的错误 (4) 任务列表 数组函数
 var ErrorTimeOut = errors.New("超时错误")
 var InterruptOut = errors.New("系统中断")
@@ -17,18 +17,20 @@ type task struct {
 	complete  chan error
 	// 单向通道 右边 发送 左边接收
 	timeOut <-chan time.Time
-	list    []func(int)
+	list    []func(int, func())
+	wg      func()
 }
 
-func New(timeOut time.Duration) *task {
+func New(timeOut time.Duration, funcDone func()) *task {
 	return &task{
 		interrupt: make(chan os.Signal, 1),
 		complete:  make(chan error),
 		timeOut:   time.After(timeOut),
+		wg:        funcDone,
 	}
 }
 
-func (t *task) Add(funcItem ...func(int)) {
+func (t *task) Add(funcItem ...func(int, func())) {
 	t.list = append(t.list, funcItem...)
 }
 
@@ -53,7 +55,7 @@ func (t *task) run() error {
 		if t.getInterrupt() {
 			return InterruptOut
 		}
-		itemFunc(i)
+		go itemFunc(i, t.wg)
 	}
 	return nil
 }
