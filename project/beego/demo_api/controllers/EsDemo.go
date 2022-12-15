@@ -3,6 +3,7 @@ package controllers
 import (
 	"bytes"
 	"context"
+	"demo_api/models"
 	"demo_api/services/es_package"
 	"encoding/json"
 	"fmt"
@@ -330,3 +331,24 @@ func (c EsDemoController) test2() {
 
 	log.Println(strings.Repeat("=", 37))
 }
+
+// 导入数据
+func (c EsDemoController) AddRecord() {
+	//初始化
+	client := es_package.NewEsClient()
+	esObj := es_package.CreateIndex(client, "test_1")
+
+	// 查询数据
+	ctx := context.Background()
+
+	var comments []*models.Comments
+	models.GetCommentsList(comments)
+	err := esObj.BatchAdd(ctx, comments)
+	if err != nil {
+		fmt.Println(err)
+	}
+	c.Data["json"] = ""
+	c.ServeJSON()
+}
+
+// 查询数据

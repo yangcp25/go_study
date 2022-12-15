@@ -78,3 +78,20 @@ func DeleteComments(content string) (int64, error) {
 
 	return 0, nil
 }
+
+func GetCommentsList(res []*Comments) []*Comments {
+	var o orm.Ormer
+	o = orm.NewOrm()
+
+	qs := o.QueryTable("comments")
+
+	ids := []int{3, 4, 5}
+	qs.Filter("id__in", ids)
+
+	_, err := qs.All(&res)
+	if err != nil {
+		return nil
+	}
+
+	return res
+}
