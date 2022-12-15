@@ -13,7 +13,7 @@ var esUrl string
 func init() {
 	esUrl = "http://192.168.1.3:19200/"
 }
-func EsSearch(indexName string, query map[string]interface{}, from int, size int, sort []map[string]string) HitsData {
+func EsSearch(indexName string, query map[string]interface{}, from int, size int, sort []map[string]string) map[string]interface{} {
 	data := make(map[string]interface{})
 	data["query"] = query
 	data["from"] = from
@@ -24,33 +24,27 @@ func EsSearch(indexName string, query map[string]interface{}, from int, size int
 	resp, _ := http.Post(url, "application/json", bytes.NewReader(bytesData))
 	body, _ := ioutil.ReadAll(resp.Body)
 
-	fmt.Println(string(body))
-	var stb ReqSearchData
+	var stb map[string]interface{}
 
 	err := json.Unmarshal(body, &stb)
 
 	if err != nil {
 		fmt.Println(err)
 	}
-	return stb.Hits
+	return stb
 }
 
 type ReqSearchData struct {
-	Hits HitsData `json:"hits"`
+	Hits HitsData `json:"hits.hits"`
 }
 
 type HitsData struct {
-	Total TotalData     `json:"total"`
-	Hits  []HitsTwoData `json:"hits"`
-}
-
-type HitsTwoData struct {
-	Source json.RawMessage `json:"_source"`
+	Source []TotalData `json:"_source"`
 }
 
 type TotalData struct {
-	Value    int
-	Relation string
+	Content string `json:"content"`
+	Title   string `json:"title"`
 }
 
 func EsAdd(indexName string, id string, body map[string]interface{}) bool {
