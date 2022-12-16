@@ -342,7 +342,7 @@ func (c EsDemoController) AddRecord() {
 	ctx := context.Background()
 
 	var comments []*models.Comments
-	models.GetCommentsList(comments)
+	comments = models.GetCommentsList(comments)
 	err := esObj.BatchAdd(ctx, comments)
 	if err != nil {
 		fmt.Println(err)
@@ -352,3 +352,27 @@ func (c EsDemoController) AddRecord() {
 }
 
 // 查询数据
+
+// 导入数据
+func (this EsDemoController) SearchEs() {
+
+	//初始化
+	client := es_package.NewEsClient()
+	esObj := es_package.CreateIndex(client, "test_1")
+
+	// 查询数据
+	ctx := context.Background()
+
+	req := make(map[string]string)
+	data := this.Ctx.Input.RequestBody //在RequestBody中读取Json
+	json.Unmarshal(data, &req)
+
+	res, err := esObj.Search(ctx, req)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(res)
+	this.Data["json"] = res
+
+	this.ServeJSON()
+}

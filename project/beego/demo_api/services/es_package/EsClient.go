@@ -7,9 +7,17 @@ import (
 	"golang.org/x/net/context"
 	"log"
 	"os"
+	"reflect"
 	"strconv"
 	"time"
 )
+
+type EsSearchData struct {
+	ShouldQuery []elastic.Query
+	From        int
+	Size        int
+	Sorters     []elastic.Sorter
+}
 
 func NewEsClient() *elastic.Client {
 	url := fmt.Sprintf("http://%s:%d", "192.168.1.3", 9200)
@@ -32,8 +40,8 @@ var mappingTpl = `{
 		"properties":{
 			"id": 				{ "type": "long" },
 			"userid": 		{ "type": "long" },
-			"content":			{ "type": "text" },
-			"create_time":		{ "type": "text" },
+			"content":			{ "type": "text","analyzer": "ik_max_word"},
+			"create_time":		{ "type": "text" }
 			}
 		}
 	}`
@@ -102,4 +110,51 @@ func (es *UserES) batchAdd(ctx context.Context, comments []*models.Comments) err
 		return err
 	}
 	return nil
+}
+
+func (es *UserES) Search(ctx context.Context, req map[string]string) ([]*models.Comments, error) {
+	id := req["id"]
+	create_time := req["create_time"]
+	content := req["content"]
+
+	var search EsSearchData
+
+	if len(id) != 0 {
+		search.ShouldQuery = append(search.ShouldQuery, elastic.NewMatchQuery("id", content))
+	}
+	if len(create_time) != 0 {
+		search.ShouldQuery = append(search.ShouldQuery, elastic.NewMatchQuery("create_time", create_time))
+	}
+	if len(content) != 0 {
+		search.ShouldQuery = append(search.ShouldQuery, elastic.NewMatchQuery("content", content))
+	}
+	search.Sorters = append(search.Sorters, elastic.NewFieldSort("create_time").Desc())
+
+	var size, _ = strconv.Atoi(req["size"])
+	var num, _ = strconv.Atoi(req["num"])
+	search.From = (num - 1) * size
+	search.Size = size
+
+	boolQuery := elastic.NewBoolQuery()
+	boolQuery.Should(search.ShouldQuery...)
+
+	service := es.client.Search().Index(es.index).Query(boolQuery).From(search.From).Size(search.Size)
+	resp, err := service.Do(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if resp.TotalHits() == 0 {
+		return nil, nil
+	}
+
+	fmt.Println(resp.TotalHits())
+	userES := make([]*models.Comments, 0)
+	for _, e := range resp.Each(reflect.TypeOf(&models.Comments{})) {
+		us := e.(*models.Comments)
+		userES = append(userES, us)
+	}
+
+	return userES, nil
 }
