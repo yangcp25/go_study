@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+option go_package = "./;articleService";
+
+message Article {
+  string user = 1;
+  int32 id = 2;
+  repeated string  readers = 3;
+}
