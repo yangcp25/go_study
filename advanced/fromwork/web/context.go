@@ -53,7 +53,32 @@ func (c Context) WriteJson(status int8, msg string, data interface{}) error {
 }
 
 type msgInfo struct {
-	code int8
-	msg  string
-	data interface{}
+	Code int
+	Msg  string
+	Data interface{}
+}
+
+func (c Context) WriteJson2(status int, msg string, data interface{}) error {
+	//
+	jsonData := &msgInfo{
+		Code: status,
+		Msg:  msg,
+		Data: data,
+	}
+
+	res, err := json.Marshal(jsonData)
+
+	if err != nil {
+		return fmt.Errorf("序列化失败")
+	}
+
+	_, err = c.W.Write(res)
+
+	c.W.WriteHeader(http.StatusOK)
+	c.W.Header().Set("content-type", "application/json")
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

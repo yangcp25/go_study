@@ -29,7 +29,7 @@ func handler5(writer http.ResponseWriter, request *http.Request) {
 
 	context.ReadJson(&data)
 
-	context.WriteJson(1, "成功", data)
+	context.WriteJson2(1, "成功", data)
 }
 
 func handler4(writer http.ResponseWriter, request *http.Request) {
