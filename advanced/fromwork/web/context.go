@@ -72,10 +72,11 @@ func (c Context) WriteJson2(status int, msg string, data interface{}) error {
 		return fmt.Errorf("序列化失败")
 	}
 
-	_, err = c.W.Write(res)
-
 	c.W.WriteHeader(http.StatusOK)
 	c.W.Header().Set("content-type", "application/json")
+
+	_, err = c.W.Write(res)
+
 	if err != nil {
 		return err
 	}
