@@ -6,24 +6,40 @@ import (
 	"strings"
 )
 
-type Server interface {
+type IRoutable interface {
 	Route(method string, pattern string, handeFunc func(c *Context))
+}
+
+type IHandler interface {
+	http.Handler
+	IRoutable
+}
+
+type Server interface {
+	IRoutable
 	Start(address string) error
 }
 
 type HttpSdk struct {
 	Name        string
-	HandlerFunc *Handler
+	HandlerFunc IHandler
 }
+
+// 确保一定实现了接口
+var _ IHandler = &Handler{}
 
 type Handler struct {
 	Handlers map[string]func(c *Context)
 }
 
+func (h Handler) Route(method string, pattern string, handeFunc func(c *Context)) {
+	key := getRouteKey(method, pattern)
+	h.Handlers[key] = handeFunc
+}
+
 // Route 添加路由
 func (h *HttpSdk) Route(method string, pattern string, handeFunc func(c *Context)) {
-	key := getRouteKey(method, pattern)
-	h.HandlerFunc.Handlers[key] = handeFunc
+	h.HandlerFunc.Route(method, pattern, handeFunc)
 }
 
 func (h *HttpSdk) Start(address string) error {
