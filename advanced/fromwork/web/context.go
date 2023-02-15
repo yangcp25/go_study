@@ -44,6 +44,7 @@ func (c Context) WriteJson(status int8, msg string, data interface{}) error {
 	if err != nil {
 		return fmt.Errorf("序列化失败")
 	}
+	c.W.Header().Set("content-type", "application/json")
 	_, err = c.W.Write(res)
 	if err != nil {
 		return err

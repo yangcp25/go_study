@@ -8,17 +8,36 @@ import (
 )
 
 func main() {
-	http.HandleFunc("/test", func(writer http.ResponseWriter, request *http.Request) {
-		str := []byte{'h', 'e', 'l', 'l', '0'}
-		writer.Write(str)
-	})
+	//http.HandleFunc("/test", func(writer http.ResponseWriter, request *http.Request) {
+	//	str := []byte{'h', 'e', 'l', 'l', '0'}
+	//	writer.Write(str)
+	//})
+	//
+	//http.HandleFunc("/test2", handler2)
+	//http.HandleFunc("/test3", handler3)
+	//http.HandleFunc("/returnJson", handler4)
+	//http.HandleFunc("/returnJson2", handler5)
+	////http.HandleFunc("/handle", handler6)
+	//http.ListenAndServe("localhost:8081", nil)
 
-	http.HandleFunc("/test2", handler2)
-	http.HandleFunc("/test3", handler3)
-	http.HandleFunc("/returnJson", handler4)
-	http.HandleFunc("/returnJson2", handler5)
-	//http.HandleFunc("/handle", handler6)
-	http.ListenAndServe("localhost:8081", nil)
+	// 自定义路由
+	//handlers := &web.Handler{}
+	//http.ListenAndServe("localhost:8081", handlers)
+
+	server := &web.HttpSdk{
+		Name: "test",
+		HandlerFunc: &web.Handler{
+			Handlers: make(map[string]func(c *web.Context), 100),
+		},
+	}
+	server.Route("post", "/test", handler6)
+	server.Start("localhost:8081")
+}
+
+func handler6(c *web.Context) {
+	var data map[string]interface{}
+	c.ReadJson(&data)
+	c.WriteJson(1, "success", data)
 }
 
 func handler5(writer http.ResponseWriter, request *http.Request) {
