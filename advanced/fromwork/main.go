@@ -17,6 +17,7 @@ func main() {
 	http.HandleFunc("/test3", handler3)
 	http.HandleFunc("/returnJson", handler4)
 	http.HandleFunc("/returnJson2", handler5)
+	//http.HandleFunc("/handle", handler6)
 	http.ListenAndServe("localhost:8081", nil)
 }
 
