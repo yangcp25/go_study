@@ -4,7 +4,7 @@ import "fmt"
 
 // 快速排序
 // 时间复杂度
-// 稳定的算法
+// 不稳定的算法
 func main() {
 	intArray := []int{4, 5, 6, 7, 3, 2, 1, 8, 9}
 	intArray2 := []int{2, 1}
