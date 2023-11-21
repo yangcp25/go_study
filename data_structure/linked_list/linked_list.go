@@ -127,7 +127,9 @@ func main() {
 	linkedListOne.insertNode(2)
 	linkedListOne.insertNode(3)
 
-	linkedListOne.insertNodeByValue(9, 1)
+	fmt.Printf("%+v", linkedListOne.nodeHead)
 
+	//linkedListOne.insertNodeByValue(9, 1)
+	//
 	linkedListOne.rangeNode()
 }
