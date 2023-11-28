@@ -28,7 +28,6 @@ func main() {
 
 type linked[T int | string | map[string]string] struct {
 	head   *node[T]
-	end    *node[T]
 	length int
 	limit  int
 }
@@ -62,51 +61,35 @@ func (l *linked[T]) headInsert(data T) bool {
 	if l.head == nil {
 		l.head = newNode
 		l.length++
-		l.end = newNode
+		newNode.next = newNode
+		newNode.prev = newNode
 		return true
 	}
 
-	headNode := l.head
+	currentNode := l.head
+	// 头结点位置
+	headNodePos := l.head
 
 	l.head = newNode
-	newNode.next = headNode
-	headNode.prev = newNode
+	newNode.next = currentNode
+	currentNode.prev = newNode
 
-	if l.length >= l.limit {
-		for {
-			if headNode.next == nil {
-				break
-			}
-			headNode = headNode.next
+	// 找尾结点
+	for {
+		if currentNode.next == headNodePos {
+			break
 		}
-		headNode.prev.next = nil
-	} else {
-		l.length++
+		currentNode = currentNode.next
 	}
-	return true
-}
-
-// 从尾部插入
-func (l *linked[T]) tailInsert(data T) bool {
-	newNode := createNode(data)
-
-	newNode.prev = l.head
-	newNode.next = l.head.next
-	l.head.next = newNode
-
-	headNode := l.head
-	for headNode.next != nil {
-		headNode = headNode.next
-	}
-
-	l.end = headNode
 
 	if l.length >= l.limit {
-		l.delete(l.end)
+		currentNode.prev.next = newNode
+		newNode.prev = currentNode.prev
 	} else {
+		currentNode.next = newNode
+		newNode.prev = currentNode
 		l.length++
 	}
-
 	return true
 }
 
@@ -117,10 +100,11 @@ func (l *linked[T]) delete(node *node[T]) {
 // 从头部遍历
 func (l *linked[T]) headForeach() {
 	headNode := l.head
+	headNodPos := headNode
 	fmt.Printf("从头结点遍历：\n")
 	for {
 		fmt.Printf("当前节点: %+v\n", headNode.data)
-		if headNode.next == nil {
+		if headNode.next == headNodPos {
 			break
 		}
 		headNode = headNode.next
@@ -129,11 +113,12 @@ func (l *linked[T]) headForeach() {
 
 // 从尾部遍历
 func (l *linked[T]) tailForeach() {
-	endNode := l.end
+	endNode := l.head
+	endNodePos := endNode
 	fmt.Printf("从尾结点遍历：\n")
 	for {
-		fmt.Printf("当前节点: %+v\n", endNode.data)
-		if endNode.prev == nil {
+		fmt.Printf("当前节点: %+v\n", endNode.prev.data)
+		if endNode.prev == endNodePos {
 			break
 		}
 		endNode = endNode.prev
