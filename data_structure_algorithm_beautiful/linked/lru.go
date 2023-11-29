@@ -4,7 +4,6 @@ import "fmt"
 
 func main() {
 	// 实现一个lru 淘汰算法
-	// 双向循环链表
 	// linked 结构体
 	// node 节点 ： data prev next
 	// 更新lru
