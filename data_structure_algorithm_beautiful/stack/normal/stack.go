@@ -17,8 +17,10 @@ func main() {
 	stack1.push(4)
 	stack1.push(5)
 
-	stack1.pop()
-	stack1.pop()
+	popData1 := stack1.pop()
+	fmt.Printf("弹出栈元素%+v\n", *popData1)
+	popData2 := stack1.pop()
+	fmt.Printf("弹出栈元素%+v\n", *popData2)
 
 	stack1.push(6)
 	stack1.push(7)
@@ -51,11 +53,14 @@ func (s *stack[T]) pop() *T {
 	if length == 0 {
 		return nil
 	}
-	return &s.data[length-1]
+	res := &s.data[length-1]
+	s.data = s.data[0 : length-1]
+	return res
 }
 
 func (s *stack[T]) forEach() {
+	fmt.Printf("遍历栈：\n")
 	for _, item := range s.data {
-		fmt.Printf("当前栈元素%+v", item)
+		fmt.Printf("当前栈元素%+v\n", item)
 	}
 }
