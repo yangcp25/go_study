@@ -8,6 +8,7 @@ import (
 func main() {
 	stack1 := createStack[int](3)
 	err := stack1.push(1)
+	// 处理错误 后面的就不处理了
 	if err != nil {
 		return
 	}
