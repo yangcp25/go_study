@@ -6,6 +6,7 @@ import (
 	"sync"
 )
 
+// todo 待做cas版本
 func main() {
 	// 双向循环链表实现队列 加锁实现并发安全
 	linkedObj := getLinked[int](5)
