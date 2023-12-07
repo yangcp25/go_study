@@ -6,38 +6,13 @@ import (
 	"sync"
 )
 
-// todo 待做cas版本
+// cas版本
 func main() {
-	// 双向循环链表实现队列 加锁实现并发安全
-	linkedObj := getLinked[int](5)
-
-	syncGroup := sync.WaitGroup{}
-	syncGroup.Add(1050)
-
-	for i := 0; i < 1000; i++ {
-		i := i
-		go func() {
-			err := linkedObj.headPush(i)
-			if err != nil {
-				fmt.Printf(err.Error())
-			}
-			syncGroup.Done()
-		}()
-	}
-	for i := 0; i < 50; i++ {
-		go func() {
-			data := linkedObj.tailPop()
-			if data != nil {
-				fmt.Println(*data)
-			}
-			syncGroup.Done()
-		}()
-	}
-	//fmt.Printf("当前节点: %+v\n", linkedObj)
-	//fmt.Printf("当前节点: %+v\n", linkedObj.head.next.data)
-
-	syncGroup.Wait()
-	linkedObj.headForeach()
+	/**
+	 (1)用原子操作去交换
+		a.拿到头结点
+		b.头结点
+	*/
 }
 
 type linked[T int | string | map[string]string] struct {
