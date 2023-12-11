@@ -18,7 +18,13 @@ func main() {
 
 	insertSort(testArray)
 
-	fmt.Printf("排序后的数组为：%+v", testArray)
+	fmt.Printf("排序后的数组为：%+v\n", testArray)
+
+	intArray := []int{4, 5, 6, 7, 8, 3, 2, 1}
+
+	insertSort(intArray)
+
+	fmt.Printf("排序后的数组为：%+v", intArray)
 }
 
 func insertSort[T constraints.Ordered](data []T) {
