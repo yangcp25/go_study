@@ -1,4 +1,4 @@
-module mergeSort
+module quickSort
 
 go 1.21
 
