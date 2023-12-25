@@ -1,5 +1,7 @@
 package main
 
+import "errors"
+
 func main() {
 
 	// 双向链表
@@ -62,7 +64,7 @@ type T any
 var _ skipListHandle[T] = &skipList[T]{}
 
 type skipListHandle[T any] interface {
-	insert(data T, score uint32) bool
+	insert(data T, score uint32) (err error)
 	delete(data T) bool
 	headForeach()
 }
@@ -71,7 +73,7 @@ type skipListNode[T any] struct {
 	data T
 	// 上一个节点 用于遍历
 	prev *skipListNode[T]
-	// 分数
+	// 排序分数
 	score uint32
 	// 下个节点 同时也是索引
 	forwards []*skipListNode[T]
@@ -91,8 +93,38 @@ func createSkipList[T any]() *skipList[T] {
 		length: 1,
 	}
 }
-func (list skipList[T]) insert(data T, score uint32) bool {
-	return false
+
+func createNode[T any](data T, score uint32) *skipListNode[T] {
+	return &skipListNode[T]{
+		data:     data,
+		prev:     nil,
+		score:    score,
+		forwards: make([]*skipListNode[T], 0, MAX_LEVEL),
+	}
+}
+func (list skipList[T]) insert(data T, score uint32) error {
+	currenNode := list.head
+	newNode := createNode(data, score)
+	if score < currenNode.score {
+
+		newNode.forwards = append(newNode.forwards, currenNode)
+		return nil
+	}
+	for {
+		if score == currenNode.score {
+			return errors.New("暂不支持相同分数的") // 暂不支持相同分数的
+		}
+
+		if score
+		length := len(currenNode.forwards)
+		for i := 0; i < length; i++ {
+
+		}
+		if length == 0 {
+			break
+		}
+	}
+	return errors.New("插入失败")
 }
 
 func (list skipList[T]) delete(data T) bool {
