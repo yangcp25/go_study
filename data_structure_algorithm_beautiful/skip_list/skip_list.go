@@ -1,6 +1,9 @@
 package main
 
-import "errors"
+import (
+	"errors"
+	"math/rand"
+)
 
 func main() {
 
@@ -66,7 +69,7 @@ var _ skipListHandle[T] = &skipList[T]{}
 type skipListHandle[T any] interface {
 	insert(data T, score uint32) (err error)
 	delete(data T) bool
-	headForeach()
+	findNode()
 }
 
 type skipListNode[T any] struct {
@@ -82,7 +85,7 @@ type skipListNode[T any] struct {
 type skipList[T any] struct {
 	head, tail *skipListNode[T]
 	// 跳表高度
-	level uint32
+	level int
 	// 跳表长度
 	length uint32
 }
@@ -104,26 +107,43 @@ func createNode[T any](data T, score uint32) *skipListNode[T] {
 }
 func (list skipList[T]) insert(data T, score uint32) error {
 	currenNode := list.head
+	maxIndex := MAX_LEVEL - 1
+	// 找到插入的位置
+	// 记录插入的路径
+	path := [MAX_LEVEL]*skipListNode[T]{}
+	for i := maxIndex; i >= 0; i++ {
+		for currenNode.forwards[i] != nil {
+			if currenNode.forwards[i].score > score {
+				path[i] = currenNode
+				break
+			}
+			currenNode = currenNode.forwards[i]
+		}
+	}
+
+	// 随机算法求得最大层数
+	level := 1
+
+	for i := 1; i < maxIndex; i++ {
+		if rand.Int31()%7 == 1 {
+			level++
+		}
+	}
+
 	newNode := createNode(data, score)
-	if score < currenNode.score {
 
-		newNode.forwards = append(newNode.forwards, currenNode)
-		return nil
+	// 原有节点连接
+	for i := 0; i < maxIndex; i++ {
+		path[i].forwards[i], newNode = newNode, path[i].forwards[i]
 	}
-	for {
-		if score == currenNode.score {
-			return errors.New("暂不支持相同分数的") // 暂不支持相同分数的
-		}
 
-		if score
-		length := len(currenNode.forwards)
-		for i := 0; i < length; i++ {
-
-		}
-		if length == 0 {
-			break
-		}
+	// 更新level
+	if level > list.level {
+		list.level = level
 	}
+
+	list.length++
+
 	return errors.New("插入失败")
 }
 
@@ -132,7 +152,7 @@ func (list skipList[T]) delete(data T) bool {
 	panic("implement me")
 }
 
-func (list skipList[T]) headForeach() {
+func (list skipList[T]) findNode() {
 	headNode := list.head
 
 	for headNode.forwards != nil {
