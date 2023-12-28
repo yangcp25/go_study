@@ -92,8 +92,8 @@ type skipList[T any] struct {
 
 func createSkipList[T any]() *skipList[T] {
 	return &skipList[T]{
-		level:  0,
-		length: 1,
+		level:  1,
+		length: 0,
 	}
 }
 
@@ -111,7 +111,7 @@ func (list skipList[T]) insert(data T, score uint32) error {
 	// 找到插入的位置
 	// 记录插入的路径
 	path := [MAX_LEVEL]*skipListNode[T]{}
-	for i := maxIndex; i >= 0; i++ {
+	for i := list.level - 1; i >= 0; i++ {
 		for currenNode.forwards[i] != nil {
 			if currenNode.forwards[i].score > score {
 				path[i] = currenNode
