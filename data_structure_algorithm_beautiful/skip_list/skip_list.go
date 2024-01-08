@@ -62,17 +62,15 @@ func main() {
 // MAX_LEVEL 最高层数
 const MAX_LEVEL = 16
 
-type T any
+type T comparable
 
-var _ skipListHandle[T] = &skipList[T]{}
-
-type skipListHandle[T any] interface {
+type skipListHandle[T comparable] interface {
 	insert(data T, score uint32) (err error)
-	delete(data T) bool
-	findNode()
+	delete(data T, score uint32) int
+	findNode(data T, score uint32) (error, *skipListNode[T])
 }
 
-type skipListNode[T any] struct {
+type skipListNode[T comparable] struct {
 	data T
 	// 上一个节点 用于遍历
 	prev *skipListNode[T]
@@ -82,7 +80,7 @@ type skipListNode[T any] struct {
 	forwards []*skipListNode[T]
 }
 
-type skipList[T any] struct {
+type skipList[T comparable] struct {
 	head, tail *skipListNode[T]
 	// 跳表高度
 	level int
@@ -90,14 +88,14 @@ type skipList[T any] struct {
 	length uint32
 }
 
-func createSkipList[T any]() *skipList[T] {
+func createSkipList[T comparable]() *skipList[T] {
 	return &skipList[T]{
 		level:  1,
 		length: 0,
 	}
 }
 
-func createNode[T any](data T, score uint32) *skipListNode[T] {
+func createNode[T comparable](data T, score uint32) *skipListNode[T] {
 	return &skipListNode[T]{
 		data:     data,
 		prev:     nil,
@@ -109,15 +107,21 @@ func (list skipList[T]) insert(data T, score uint32) error {
 	currenNode := list.head
 	maxIndex := MAX_LEVEL - 1
 	// 找到插入的位置
-	// 记录插入的路径
+	// 记录插入的路径 记录第一个比待查找的值小的位置
 	path := [MAX_LEVEL]*skipListNode[T]{}
 	for i := list.level - 1; i >= 0; i++ {
 		for currenNode.forwards[i] != nil {
+			// 如果插入的位置比当前数据小 直接跳出循环并且高度下降
 			if currenNode.forwards[i].score > score {
 				path[i] = currenNode
 				break
 			}
+			// 插入位置比当前的大，在当前层继续往前找
 			currenNode = currenNode.forwards[i]
+		}
+		// 如果currenNode.forwards[i] == nil 说明是最后一个值了 所以直接插入
+		if currenNode.forwards[i] == nil {
+			path[i] = currenNode
 		}
 	}
 
@@ -134,7 +138,10 @@ func (list skipList[T]) insert(data T, score uint32) error {
 
 	// 原有节点连接
 	for i := 0; i < maxIndex; i++ {
-		path[i].forwards[i], newNode = newNode, path[i].forwards[i]
+		next := path[i].forwards[i]
+		// path[i]拿到第一个插入值小的位置 forwards[i] 是指在当前层它指向的下个节点
+		newNode.forwards[i] = next
+		path[i].forwards[i] = newNode
 	}
 
 	// 更新level
@@ -147,15 +154,56 @@ func (list skipList[T]) insert(data T, score uint32) error {
 	return errors.New("插入失败")
 }
 
-func (list skipList[T]) delete(data T) bool {
-	//TODO implement me
-	panic("implement me")
+func (list skipList[T]) delete(data T, score uint32) int {
+	currenNode := list.head
+	// 找到插入的位置
+	// 记录插入的路径 记录第一个比待查找的值小的位置
+	path := [MAX_LEVEL]*skipListNode[T]{}
+	for i := list.level - 1; i >= 0; i++ {
+		path[i] = list.head
+		for currenNode.forwards[i] != nil {
+			// 記錄刪除的位置
+			if currenNode.forwards[i].score == score && currenNode.forwards[i].data == data {
+				path[i] = currenNode
+				break
+			}
+			// 插入位置比当前的大，在当前层继续往前找
+			currenNode = currenNode.forwards[i]
+		}
+	}
+	currenNode = path[0].forwards[0]
+	for i := list.level - 1; i >= 0; i-- {
+		if path[i] == list.head && currenNode.forwards[i] == nil {
+			list.level = i
+		}
+
+		if nil == path[i].forwards[i] {
+			path[i].forwards[i] = nil
+		} else {
+			path[i].forwards[i] = path[i].forwards[i].forwards[i]
+		}
+	}
+
+	list.length--
+
+	return 0
 }
 
-func (list skipList[T]) findNode() {
-	headNode := list.head
-
-	for headNode.forwards != nil {
-
+func (list skipList[T]) findNode(v T, score uint32) (err error, node *skipListNode[T]) {
+	if nil == v || list.length == 0 {
+		return errors.New("请传入查找的值"), node
 	}
+
+	cur := list.head
+	for i := list.level - 1; i >= 0; i-- {
+		for nil != cur.forwards[i] {
+			if cur.forwards[i].score == score && cur.forwards[i].data == v {
+				return nil, cur.forwards[i]
+			} else if cur.forwards[i].score > score {
+				break
+			}
+			cur = cur.forwards[i]
+		}
+	}
+	return errors.New("请传入查找的值"), nil
 }
