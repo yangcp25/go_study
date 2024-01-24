@@ -41,9 +41,8 @@ golang 学习日志 包含基础、进阶、框架 ，数据结构与算法的�
 [skip_list.go](data_structure_algorithm_beautiful%2Fskip_list%2Fskip_list.go)
 
 #### 图
-##### 实现有向图、无向图、有权图、无权图的邻接矩阵和邻接表表示方法
-
-##### 实现图的深度优先搜索、广度优先搜索
+##### 实现有向图、无向图、有权图、无权图的邻接矩阵和邻接表表示方法、实现图的深度优先搜索、广度优先搜索
+[graph_v1](data_structure_algorithm_beautiful%2Fgraph%2Fgraph_v1)
 ##### 实现 Dijkstra 算法、A* 算法
 ##### 实现拓扑排序的 Kahn 算法、DFS 算法
 
