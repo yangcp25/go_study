@@ -127,7 +127,7 @@ func main() {
 	linkedListOne.insertNode(2)
 	linkedListOne.insertNode(3)
 
-	fmt.Printf("%+v", linkedListOne.nodeHead)
+	fmt.Printf("%+v", linkedListOne.nodeHead.data)
 
 	//linkedListOne.insertNodeByValue(9, 1)
 	//

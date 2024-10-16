@@ -5,16 +5,24 @@ import "fmt"
 // 树的三种遍历
 func main() {
 	// 简化版树结构
-	tree := newNode(0)
-	tree1 := newNode(1)
-	tree2 := newNode(2)
+	tree := newNode("A")
+	tree1 := newNode("B")
+	tree2 := newNode("C")
 
 	tree.Left = tree1
 	tree.Right = tree2
 
+	tree.Left.Left = newNode("D")
+	tree.Left.Right = newNode("E")
+
+	tree.Right.Left = newNode("F")
+	tree.Right.Right = newNode("G")
+
 	// 前序遍历
 	preOrderTraverse(tree)
+	fmt.Println()
 	midOrderTraverse(tree)
+	fmt.Println()
 	lastOrderTraverse(tree)
 	// 中序遍历
 	// 后序遍历
@@ -33,17 +41,17 @@ func midOrderTraverse(t *Tree) {
 	if t == nil {
 		return
 	}
-	preOrderTraverse(t.Left)
+	midOrderTraverse(t.Left)
 	t.printNode()
-	preOrderTraverse(t.Right)
+	midOrderTraverse(t.Right)
 }
 
 func lastOrderTraverse(t *Tree) {
 	if t == nil {
 		return
 	}
-	preOrderTraverse(t.Left)
-	preOrderTraverse(t.Right)
+	lastOrderTraverse(t.Left)
+	lastOrderTraverse(t.Right)
 	t.printNode()
 }
 
