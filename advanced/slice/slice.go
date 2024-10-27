@@ -28,12 +28,13 @@ func main() {
 
 func testFunc(s []int) {
 	// i只是一个副本，不能改变s中元素的值
-	for _, i := range s {
-		i++
-	}
-	for _, i := range s {
-		print(i)
-	}
+	//for _, i := range s {
+	//	i++
+	//}
+	s = append(s, 1)
+	//for _, i := range s {
+	//	print(i)
+	//}
 
 	//for i := range s {
 	//	s[i] += 1
