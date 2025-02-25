@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"time"
 )
 
 func goroutineA(a <-chan int) {
@@ -17,10 +16,10 @@ func goroutineB(b <-chan int) {
 	return
 }
 
-func main() {
-	ch := make(chan int)
-	go goroutineA(ch)
-	go goroutineB(ch)
-	ch <- 3
-	time.Sleep(time.Second)
-}
+//func main() {
+//	ch := make(chan int)
+//	go goroutineA(ch)
+//	go goroutineB(ch)
+//	ch <- 3
+//	time.Sleep(time.Second)
+//}
