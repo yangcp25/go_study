@@ -6,6 +6,50 @@ import (
 	"math"
 )
 
+/*
+*
+A --1-- B --2-- C
+
+	\      |      /
+	 3     1     4
+	  \    |    /
+	    -- D --
+
+a
+b d
+d c d
+d c
+
+3 3
+1 2 11
+2 3 13
+1 3 50
+1 3
+
+6 9
+1 2 2
+1 3 5
+2 3 1
+2 4 4
+3 4 2
+3 5 7
+4 5 3
+4 6 8
+5 6 2
+1 6
+
+5 7
+1 2 1
+1 3 3
+2 3 1
+2 4 5
+3 4 2
+3 5 7
+4 5 1
+1 5
+
+漫步香港1999
+*/
 func main() {
 	n, m := 0, 0
 	fmt.Scan(&n, &m)
@@ -21,19 +65,18 @@ func main() {
 	start, end := 0, 0
 	fmt.Scan(&start, &end)
 
-	dist := Djikstra(g, start, end, n)
+	dist := Djikstra(g, start, n)
 
-	fmt.Println(dist[end])
+	fmt.Println(dist, dist[end])
 }
 
-func Djikstra(g *Graph, start, end, n int) []int {
+func Djikstra(g *Graph, start, n int) []int {
 
 	priorityQueue := make(PriorityQueue, 0)
 	heap.Init(&priorityQueue)
-	heap.Push(&priorityQueue, Node{
+	heap.Push(&priorityQueue, &Node{
 		Vertex:   start,
 		Distance: 0,
-		Index:    0,
 	})
 
 	dist := make([]int, 0)
@@ -52,10 +95,10 @@ func Djikstra(g *Graph, start, end, n int) []int {
 		}
 
 		for _, neighbor := range g.adj[vertex] {
-			if neighbor.Distance < dist[neighbor.Vertex] {
-				dist[neighbor.Vertex] = neighbor.Distance
-				heap.Push(&priorityQueue, Node{
-					Vertex:   start,
+			if dis+neighbor.Distance < dist[neighbor.Vertex] {
+				dist[neighbor.Vertex] = dis + neighbor.Distance
+				heap.Push(&priorityQueue, &Node{
+					Vertex:   neighbor.Vertex,
 					Distance: dist[neighbor.Vertex],
 				})
 			}
@@ -100,7 +143,7 @@ func (p PriorityQueue) Len() int {
 }
 
 func (p PriorityQueue) Less(i, j int) bool {
-	return p[i].Distance > p[j].Distance
+	return p[i].Distance < p[j].Distance
 }
 
 func (p PriorityQueue) Swap(i, j int) {
