@@ -44,7 +44,7 @@ func main() {
 	//close(ch2)
 
 	//printV2()
-	testV3()
+	printV2()
 }
 
 func printV2() {
@@ -59,6 +59,7 @@ func printV2() {
 		for {
 			i, ok := <-ch1
 			if !ok {
+				close(ch2)
 				return
 			}
 			if i > 100 {
@@ -75,6 +76,7 @@ func printV2() {
 		for {
 			i, ok := <-ch2
 			if !ok {
+				close(ch1)
 				return
 			}
 			if i > 100 {
