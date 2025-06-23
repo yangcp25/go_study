@@ -22,6 +22,45 @@ func main() {
 	}
 
 	getStruct(s)
+
+	setStruct(&s)
+	fmt.Println(s.name1, s.Name2)
+
+	s2 := test1{}
+	setDefaultStruct(&s2)
+
+}
+
+type TestF struct {
+	Val1 string
+	Val2 string
+}
+
+func setDefaultStruct(t any) {
+	val := reflect.ValueOf(t)
+
+	if val.Kind() != reflect.Ptr || val.Elem().Kind() != reflect.Struct {
+		fmt.Println("not struct2")
+		return
+	}
+
+	val = val.Elem()
+	tCate := val.Type()
+
+	for i := 0; i < val.NumField(); i++ {
+		v := val.Field(i)
+		ts := tCate.Field(i)
+		zero := reflect.Zero(ts.Type).Interface()
+
+		if reflect.DeepEqual(v.Interface(), zero) {
+			if v.CanSet() {
+				var temp reflect.Value
+				temp = reflect.ValueOf("ss")
+				v.Set(temp)
+			}
+		}
+	}
+
 }
 
 func describe(v any) {
@@ -58,5 +97,27 @@ func getStruct(v any) {
 		} else {
 			fmt.Println(value.Type())
 		}
+	}
+}
+
+func setStruct(v any) {
+	val := reflect.ValueOf(v)
+	if val.Kind() != reflect.Ptr || val.Elem().Kind() != reflect.Struct {
+		fmt.Println("not struct2")
+		return
+	}
+
+	fmt.Println("---------")
+
+	val = val.Elem() // struct Value，可设置字段
+	t := val.Type()
+	for i := 0; i < val.NumField(); i++ {
+		value := val.Field(i)
+		value2 := t.Field(i)
+		if value.CanSet() {
+			//value.SetString("tets")
+			value.SetString("testxxx")
+		}
+		fmt.Println(value2.Type.String())
 	}
 }
