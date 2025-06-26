@@ -6,11 +6,21 @@ import (
 )
 
 func main() {
-	v := &Test{}
-	DynamicCallFunc(v, "Add", 1, 2)
-	DynamicCallFunc(v, "Print", "hello")
+	//v := &Test{}
+	//DynamicCallFunc(v, "Add", 1, 2)
+	//DynamicCallFunc(v, "Print", "hello")
 
 	// 使用反射获取和修改函数小写字段
+
+	testS := make([]int, 0)
+
+	appendToSlice(&testS, 1)
+
+	fmt.Println(testS)
+
+	test := make(map[string]int)
+	setMapKey(test, "test", 1)
+	fmt.Println(test)
 
 }
 
@@ -54,4 +64,29 @@ func DynamicCallFunc(v any, methodName string, args ...any) {
 		in[i] = reflect.ValueOf(arg)
 	}
 	method.Call(in)
+}
+
+func appendToSlice(v any, elm any) {
+	val := reflect.ValueOf(v)
+	if val.Kind() != reflect.Ptr || val.Elem().Kind() != reflect.Slice {
+		panic("v must be a slice")
+	}
+	val = val.Elem()
+	newV := reflect.ValueOf(elm)
+	val.Set(reflect.Append(val, newV))
+
+}
+
+func setMapKey(v any, key, value any) {
+	val := reflect.ValueOf(v)
+	if val.Kind() != reflect.Map {
+		panic("v must be a map")
+	}
+	//val = val.Elem()
+	newV := reflect.ValueOf(value)
+	val.SetMapIndex(reflect.ValueOf(key), newV)
+}
+
+type test1 struct {
+	Val int `json:"val"`
 }
