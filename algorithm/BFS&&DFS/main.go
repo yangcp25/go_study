@@ -3,6 +3,9 @@ package main
 import "fmt"
 
 func main() {
+	//     1
+	//   2   3
+	// 5    4
 	root := &TreeNode{
 		Val: 1,
 	}
@@ -14,6 +17,9 @@ func main() {
 	list := make([]int, 0)
 	TreeDFS(root, &list)
 	fmt.Println(list)
+	listMid := make([]int, 0)
+	TreeDFSMid(root, &listMid)
+	fmt.Println(listMid)
 	list2 := make([]int, 0)
 	queue := make([]*TreeNode, 0)
 	queue = append(queue, root)
@@ -33,6 +39,39 @@ func main() {
 	}
 	fmt.Println(list2)
 
+	// 通过 list listMid 构造二叉树
+	// [1 2 5 3 4] 先序
+	// [2 5 1 3 4] 中序
+	// 1 [2 5 3 4] [2 5] i = 2 [3 4]
+	// [2 5 3 4] [2 5]
+	// [5 3 4] [5]
+
+	copyTreeRoot := BuildTree(list, listMid)
+	fmt.Println(copyTreeRoot)
+	list3 := make([]int, 0)
+	TreeDFS(root, &list3)
+	fmt.Println(list3)
+
+	SliceTest()
+}
+
+func BuildTree(first []int, mid []int) *TreeNode {
+	if len(first) == 0 {
+		return nil
+	}
+	root := &TreeNode{}
+	node := first[0]
+	first = first[1:]
+	i := 0
+	for ; i < len(mid); i++ {
+		if mid[i] == node {
+			root.Val = mid[i]
+			break
+		}
+	}
+	root.Left = BuildTree(first, mid[:i])
+	root.Right = BuildTree(first, mid[i+1:])
+	return root
 }
 
 func TreeDFS(root *TreeNode, list *[]int) {
@@ -43,9 +82,23 @@ func TreeDFS(root *TreeNode, list *[]int) {
 	TreeDFS(root.Left, list)
 	TreeDFS(root.Right, list)
 }
+func TreeDFSMid(root *TreeNode, list *[]int) {
+	if root == nil {
+		return
+	}
+	TreeDFS(root.Left, list)
+	*list = append(*list, root.Val)
+	TreeDFS(root.Right, list)
+}
 
 type TreeNode struct {
 	Val   int
 	Left  *TreeNode
 	Right *TreeNode
+}
+
+func SliceTest() {
+	slice1 := []int{1, 2, 3, 4, 5}
+
+	fmt.Println(slice1[0:1])
 }
