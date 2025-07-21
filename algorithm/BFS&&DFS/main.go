@@ -1,4 +1,4 @@
-package main
+package fs
 
 import "fmt"
 
@@ -42,35 +42,35 @@ func main() {
 	// 通过 list listMid 构造二叉树
 	// [1 2 5 3 4] 先序
 	// [2 5 1 3 4] 中序
-	// 1 [2 5 3 4] [2 5] i = 2 [3 4]
+	// 1 [2 5] [2 5] i = 2 [3 4]
 	// [2 5 3 4] [2 5]
 	// [5 3 4] [5]
 
 	copyTreeRoot := BuildTree(list, listMid)
 	fmt.Println(copyTreeRoot)
 	list3 := make([]int, 0)
-	TreeDFS(root, &list3)
-	fmt.Println(list3)
+	TreeDFS(copyTreeRoot, &list3)
+	fmt.Println("list3:", list3)
 
-	SliceTest()
+	//SliceTest()
+
+	//
 }
 
 func BuildTree(first []int, mid []int) *TreeNode {
 	if len(first) == 0 {
 		return nil
 	}
-	root := &TreeNode{}
+	root := &TreeNode{Val: first[0]}
 	node := first[0]
-	first = first[1:]
 	i := 0
 	for ; i < len(mid); i++ {
 		if mid[i] == node {
-			root.Val = mid[i]
 			break
 		}
 	}
-	root.Left = BuildTree(first, mid[:i])
-	root.Right = BuildTree(first, mid[i+1:])
+	root.Left = BuildTree(first[1:i+1], mid[:i])
+	root.Right = BuildTree(first[i+1:], mid[i+1:])
 	return root
 }
 
