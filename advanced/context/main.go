@@ -1,9 +1,11 @@
-package mian
+package main
 
 import (
 	"context"
 	"fmt"
+	"math/rand"
 	"net/http"
+	"time"
 )
 
 //const (
@@ -72,6 +74,24 @@ func Handle(rw http.ResponseWriter, req *http.Request) {
 }
 
 func main() {
-	handler := WithRequestID(http.HandlerFunc(Handle))
-	http.ListenAndServe("/", handler)
+	//handler := WithRequestID(http.HandlerFunc(Handle))
+	//http.ListenAndServe("/", handler)
+	WithCancelT()
+}
+
+func WithCancelT() {
+	ctx, cancel := context.WithCancel(context.Background())
+
+	go Test2(ctx)
+
+	time.Sleep(5 * time.Second)
+	cancel()
+
+	select {}
+}
+
+func Test2(ctx context.Context) {
+	for {
+		fmt.Println(rand.Intn(100))
+	}
 }

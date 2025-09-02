@@ -6,6 +6,9 @@ import (
 )
 
 func main() {
+	//var v any = 4
+	//t := v .(string)
+	//fmt.Println(t)
 
 	describe(123)
 	describe("hello")

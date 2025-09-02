@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+option go_package = "server/api";
+package server;
+
+service GrpcServer {
+  rpc Test(reqMsg) returns (rpMsg){}
+}
+
+message reqMsg {}
+message rpMsg {}

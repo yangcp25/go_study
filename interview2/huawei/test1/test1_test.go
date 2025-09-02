@@ -51,3 +51,31 @@ func BenchmarkSubStrLasPos(b *testing.B) {
 		SubStrLasPos(string(L), S)
 	}
 }
+
+func Test_search(t *testing.T) {
+	type args struct {
+		arr   []int
+		limit int
+	}
+	tests := []struct {
+		name string
+		args args
+		want int
+	}{
+		{
+			name: "<UNK>",
+			args: args{
+				arr:   []int{1, 2, 3, 4, 5},
+				limit: 3,
+			},
+			want: 2,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := search(tt.args.arr, tt.args.limit); got != tt.want {
+				t.Errorf("search() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
