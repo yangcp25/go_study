@@ -51,86 +51,72 @@ func main() {
 	// 输出: 4 true
 }
 
-type node struct {
-	next *node
-	pre  *node
+type Node struct {
+	next *Node
+	pre  *Node
 	val  int
+	key  int
 }
-type MapValue struct {
-	node *node
-}
+
 type LruCache struct {
-	capacity int
-	data     map[int]MapValue
-	head     *node
-	tail     *node
+	capacity   int
+	size       int
+	cache      map[int]*Node
+	head, tail *Node
 }
 
 func Constructor(capacity int) *LruCache {
 	return &LruCache{
 		capacity: capacity,
-		//head:     &node{},
-		//tail:     &node{},
-		data: make(map[int]MapValue, capacity),
+		cache:    make(map[int]*Node, capacity),
+		head:     &Node{},
+		tail:     &Node{},
 	}
 }
 
 // 1 2 3 4
 func (l *LruCache) Get(key int) (int, bool) {
 	// 从map拿数据
-	if v, ok := l.data[key]; ok {
-		if v.node.pre != nil {
-			// 更新链表，将数据放到头部
-			newNode := &node{
-				val: v.node.val,
-			}
-
-			newNode.pre = nil
-			newNode.next = l.head
-			l.head = newNode
-			// 删除该节点
-			v.node.pre.next = v.node.next
-		}
-		return v.node.val, true
+	if v, ok := l.cache[key]; ok {
+		return v.val, true
 	} else {
-		return 0, false
+		return -1, false
 	}
 }
 
-func (l *LruCache) Put(key int, value int) {
-	//head :=
-	if v, ok := l.data[key]; ok {
-		v.node.val = value
-		// 更新到头节点
-		//head.next = v.node
-		//v.node.pre = head
-		//v.node.next = v.node.pre.next
-		return
-	} else {
-		newNode := MapValue{
-			node: &node{
-				val: value,
-			},
-		}
-		l.data[key] = newNode
-		if l.head == nil {
-			l.head = newNode.node
-		} else {
-			newNode.node.pre = nil
-			temp := l.head
-			l.head = newNode.node
-			newNode.node.next = temp
-			temp.pre = newNode.node
-		}
-		length := len(l.data)
-		// 更新尾节点
-		if l.tail == nil {
-			l.tail = newNode.node
-		}
-		if length > l.capacity {
-			// 删除尾部节点 更新尾节点
-			l.tail = l.tail.pre
-			l.tail.next = nil
-		}
+func (l *LruCache) Put(key int, val int) {
+	l.AddToHead(key, val)
+	l.size++
+	if l.size > l.capacity {
+		l.RemoveTail()
 	}
 }
+
+func InitNode(key, val int) *Node {
+	return &Node{
+		key: key,
+		val: val,
+	}
+}
+
+// 添加到头节点
+func (l *LruCache) AddToHead(key, val int) {
+	newNode := InitNode(key, val)
+	newNode.next = l.head.next
+	l.head.next = newNode
+}
+
+func (l *LruCache) RemoveNode(node *Node) {
+	node.pre.next = node.next
+	node.next.pre = node.pre
+}
+
+func (l *LruCache) RemoveTail(node *Node) {
+	l.RemoveNode(l.tail)
+}
+
+func (l *LruCache) MoveToHead() {}
+
+// 添加节点
+// 删除节点
+// 删除尾节点
