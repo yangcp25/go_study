@@ -32,23 +32,13 @@ import "fmt"
 func main() {
 	// 构造 一个 LRU cache
 	cache := Constructor(2)
+	cache.Put(2, 1)
 	cache.Put(1, 1)
-	cache.Put(2, 2)
+	cache.Put(2, 3)
+	cache.Put(4, 1)
+	fmt.Println(cache.Get(1))
+	fmt.Println(cache.Get(2))
 
-	// 测试缓存获取
-	fmt.Println(cache.Get(1)) // 输出: 1 true
-	fmt.Println(cache.Get(3)) // 输出: 0 false
-
-	cache.Put(3, 3)
-	fmt.Println(cache.Get(2)) // 输出: 0 false
-
-	cache.Put(4, 4)
-	fmt.Println(cache.Get(1)) // 输出: 0 false
-	fmt.Println(cache.Get(3)) // 输出: 3 true
-	fmt.Println(cache.Get(4)) // 输出: 4 true
-	// 测试缓存获取
-
-	// 输出: 4 true
 }
 
 type Node struct {
@@ -58,38 +48,52 @@ type Node struct {
 	key  int
 }
 
-type LruCache struct {
+type LRUCache struct {
 	capacity   int
 	size       int
 	cache      map[int]*Node
 	head, tail *Node
 }
 
-func Constructor(capacity int) *LruCache {
-	return &LruCache{
+func Constructor(capacity int) LRUCache {
+	l := LRUCache{
 		capacity: capacity,
 		cache:    make(map[int]*Node, capacity),
 		head:     &Node{},
 		tail:     &Node{},
 	}
+	l.head.next = l.tail
+	l.tail.pre = l.head
+	return l
 }
 
 // 1 2 3 4
-func (l *LruCache) Get(key int) (int, bool) {
+func (l *LRUCache) Get(key int) int {
 	// 从map拿数据
-	if v, ok := l.cache[key]; ok {
-		return v.val, true
-	} else {
-		return -1, false
+	if _, ok := l.cache[key]; !ok {
+		return -1
 	}
+	node := l.cache[key]
+	l.MoveToHead(node)
+	return node.val
 }
 
-func (l *LruCache) Put(key int, val int) {
-	l.AddToHead(key, val)
-	l.size++
-	if l.size > l.capacity {
-		l.RemoveTail()
+func (l *LRUCache) Put(key int, val int) {
+	if _, ok := l.cache[key]; ok {
+		l.cache[key].val = val
+		l.MoveToHead(l.cache[key])
+	} else {
+		l.size++
+		node := InitNode(key, val)
+		l.cache[key] = node
+		l.AddToHead(node)
+		if l.size > l.capacity {
+			node := l.RemoveTail()
+			l.size--
+			delete(l.cache, node.key)
+		}
 	}
+
 }
 
 func InitNode(key, val int) *Node {
@@ -100,22 +104,30 @@ func InitNode(key, val int) *Node {
 }
 
 // 添加到头节点
-func (l *LruCache) AddToHead(key, val int) {
-	newNode := InitNode(key, val)
+func (l *LRUCache) AddToHead(newNode *Node) *Node {
 	newNode.next = l.head.next
+	newNode.pre = l.head
+	l.head.next.pre = newNode
 	l.head.next = newNode
+	return newNode
 }
 
-func (l *LruCache) RemoveNode(node *Node) {
+func (l *LRUCache) RemoveNode(node *Node) {
 	node.pre.next = node.next
 	node.next.pre = node.pre
 }
 
-func (l *LruCache) RemoveTail(node *Node) {
-	l.RemoveNode(l.tail)
+func (l *LRUCache) RemoveTail() *Node {
+	node := l.tail.pre
+	//l.tail.pre = node.pre
+	l.RemoveNode(node)
+	return node
 }
 
-func (l *LruCache) MoveToHead() {}
+func (l *LRUCache) MoveToHead(node *Node) {
+	l.RemoveNode(node)
+	l.AddToHead(node)
+}
 
 // 添加节点
 // 删除节点
