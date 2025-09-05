@@ -33,86 +33,64 @@ func main() {
 	m, n := Atoi(strArr[0]), Atoi(strArr[1])
 	pos1, pos2, pos3, pos4 := Atoi(strArr[2]), Atoi(strArr[3]), Atoi(strArr[4]), Atoi(strArr[5])
 
-	dp := make([][]int, m)
-	for k := range dp {
-		dp[k] = make([]int, n)
-	}
-	dp[pos1][pos2] = 1
-	dp[pos3][pos4] = 1
-	//fmt.Println(dp[pos1][pos2])
-	//fmt.Println(dp[pos3][pos4])
-	//count := m*n
-	path := make([]int, 0)
-	path = append(path, GetPosKey(pos1, pos2, m), GetPosKey(pos3, pos4, m))
-	//fmt.Println(path)
-	times, count := 0, 2
-OutLoop:
+	time := getMatrixBroadcastTime(m, n, pos1, pos2, pos3, pos4)
+	fmt.Println(time)
+}
+
+func getMatrixBroadcastTime(m, n, pos1, pos2, pos3, pos4 int) (res int) {
+	path := make([]string, 0)
+
+	path = append(path, getPos(pos1, pos2))
+	path = append(path, getPos(pos3, pos4))
+
+	check := make(map[string]bool)
+	check[getPos(pos1, pos2)] = true
+	check[getPos(pos3, pos4)] = true
+	count := 2
 	for len(path) > 0 {
-		times++
 		length := len(path)
-		fmt.Println("path", path)
-		temp := make([]int, 0)
-		//copy(temp, path)
 		for i := 0; i < length; i++ {
-			// 取得上下左右
-			beihor := GetNeibor(path[i], m, n)
-			fmt.Println(path, path[i], "beihor", beihor)
-			for _, v := range beihor {
-				posT1, posT2 := GetPos(v, n)
-				if dp[posT1][posT2] == 0 {
-					temp = append(temp, v)
-					count++
-					fmt.Println("count", count)
-					dp[posT1][posT2] = 1
-					fmt.Println(dp)
-					if count == m*n {
-						break OutLoop
-					}
-				}
+			pos := strings.Split(path[i], "_")
+			x, y := Atoi(pos[0]), Atoi(pos[1])
+			// 上
+			if x-1 >= 0 && check[getPos(x-1, y)] != true {
+				path = append(path, getPos(x-1, y))
+				check[getPos(x-1, y)] = true
+				count++
+			}
+			// 下
+			if x+1 < m && check[getPos(x+1, y)] != true {
+				path = append(path, getPos(x+1, y))
+				check[getPos(x+1, y)] = true
+				count++
+			}
+			// 左
+			if y-1 >= 0 && check[getPos(x, y-1)] != true {
+				path = append(path, getPos(x, y-1))
+				check[getPos(x, y-1)] = true
+				count++
+			}
+			// 右
+			if y+1 < n && check[getPos(x, y+1)] != true {
+				path = append(path, getPos(x, y+1))
+				check[getPos(x, y+1)] = true
+				count++
 			}
 		}
-		path = temp
+		res++
+		if count >= m*n {
+			return
+		}
 	}
-	fmt.Println(times)
 
+	return
+}
+
+func getPos(x, y int) string {
+	return fmt.Sprintf("%d_%d", x, y)
 }
 
 func Atoi(str string) int {
 	res, _ := strconv.Atoi(str)
 	return res
-}
-
-func GetPosKey(i, j, m int) int {
-	return m*i + j
-}
-
-// 5 x 4
-func GetPos(i, n int) (int, int) {
-	row := i / n
-	col := i - row*n
-	return row, col
-}
-
-func GetNeibor(i, m, n int) []int {
-	t1, t2 := GetPos(i, n)
-	neibor := make([]int, 0)
-	// 上
-	if t2-1 >= 0 {
-		//neibor = append(neibor, t1-1)
-		neibor = append(neibor, GetPosKey(t1, t2-1, m))
-	}
-	if t2+1 <= m-1 {
-		//neibor = append(neibor, t2+1)
-		neibor = append(neibor, GetPosKey(t1, t2+1, m))
-	}
-
-	if t1-1 >= 0 {
-		//neibor = append(neibor, t1-1)
-		neibor = append(neibor, GetPosKey(t1-1, t2, m))
-	}
-
-	if t1+1 <= n-1 {
-		neibor = append(neibor, GetPosKey(t1+1, t2, m))
-	}
-	return neibor
 }
