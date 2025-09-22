@@ -1,7 +1,7 @@
 package main
 
 import (
-	heap2 "container/heap"
+	"container/heap"
 	"fmt"
 	"sort"
 )
@@ -45,7 +45,7 @@ premium lock icon
 输出：6
 */
 func main() {
-	res := findMaximizedCapital(2, 0, []int{1, 2, 3}, []int{0, 1, 1})
+	res := findMaximizedCapital(10, 0, []int{1, 2, 3}, []int{0, 1, 2})
 	fmt.Println(res)
 }
 
@@ -70,28 +70,23 @@ func findMaximizedCapital(k int, w int, profits []int, capital []int) int {
 		return projects[i].capital < projects[j].capital
 	})
 
-	//
-	check := make(map[int]bool)
-
-	for len(check) < k {
-		heapMax := &MaxHeap{}
-		heap2.Init(heapMax)
-		for i := 0; i < k; i++ {
-			if capital[i] <= w && !check[i] {
-				heap2.Push(heapMax, project{
-					key:     i,
-					capital: profits[i] - capital[i],
-					profit:  profits[i],
-				})
+	idx := 0
+	maxHeap := &MaxHeap{}
+	heap.Init(maxHeap)
+	for i := 0; i < k; i++ {
+		// 从project 拿到可以的资本列表 ，然后选择最大的利润
+		j := idx
+		for ; j < len(projects); j++ {
+			if projects[j].capital <= w {
+				heap.Push(maxHeap, projects[j])
+				idx = j
 			}
 		}
-		if heapMax.Len() > 0 {
-			project := heap2.Pop(heapMax).(project)
-			w += project.capital
-			check[project.key] = true
-		} else {
+		if maxHeap.Len() == 0 {
 			break
 		}
+		cur := heap.Pop(maxHeap).(project)
+		w += cur.profit
 	}
 
 	return w
@@ -104,7 +99,6 @@ func Max(a, b int) int {
 }
 
 type project struct {
-	key     int
 	capital int
 	profit  int
 }
@@ -115,7 +109,7 @@ func (m MaxHeap) Len() int {
 }
 
 func (m MaxHeap) Less(i, j int) bool {
-	return m[i].capital > m[j].capital
+	return m[i].profit > m[j].profit
 }
 
 func (m MaxHeap) Swap(i, j int) {
