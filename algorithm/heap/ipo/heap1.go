@@ -75,12 +75,9 @@ func findMaximizedCapital(k int, w int, profits []int, capital []int) int {
 	heap.Init(maxHeap)
 	for i := 0; i < k; i++ {
 		// 从project 拿到可以的资本列表 ，然后选择最大的利润
-		j := idx
-		for ; j < len(projects); j++ {
-			if projects[j].capital <= w {
-				heap.Push(maxHeap, projects[j])
-				idx = j
-			}
+		for idx < len(projects) && projects[idx].capital <= w {
+			heap.Push(maxHeap, projects[idx])
+			idx++
 		}
 		if maxHeap.Len() == 0 {
 			break
