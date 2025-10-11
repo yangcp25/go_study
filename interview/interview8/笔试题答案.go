@@ -3,6 +3,7 @@ package main
 import (
 	"crypto/rand"
 	"crypto/sha256"
+	"encoding/binary"
 	"encoding/hex"
 	"fmt"
 	"hash"
@@ -13,44 +14,179 @@ import (
 
 // Conn 是你需要实现的一种连接类型，它支持下面描述的若干接口；
 // 为了实现这些接口，你需要设计一个基于 TCP 的简单协议；
+//
+// 协议设计：
+// 采用 Length-Value (LV) 格式进行分帧。
+// 一个完整的 key-value 数据流由以下帧序列组成：
+// 1. Key Frame: [4-byte length of key][key content]
+// 2. Data Frames: [4-byte length of data chunk][data chunk content] ... (可以有多个)
+// 3. End Frame: [4-byte length = 0]
+// 所有长度均为 BigEndian 编码的 uint32。
+// 定义协议中的帧类型
+const (
+	FrameTypeData byte = 0x01
+	FrameTypeEnd  byte = 0x02
+)
+
+// incomingStream 用于在 readLoop 和 Receive 之间传递新发现的数据流
+type incomingStream struct {
+	key    string
+	reader io.Reader
+}
+
 type Conn struct {
-	NetConn     net.Conn
-	WriteCloser map[string]io.WriteCloser
-	ReadCloser  map[string]io.ReadCloser
+	netConn net.Conn
+
+	// receive 相关
+	incoming chan incomingStream       // 用于接收新的数据流
+	readers  map[string]*io.PipeWriter // 存储每个 key 对应的 pipe writer
+
+	// send 相关
+	writeMutex sync.Mutex // 保证并发写 net.Conn 是安全的
 }
 
-// Send 传入一个 key 表示发送者将要传输的数据对应的标识；
-// 返回 writer 可供发送者分多次写入大量该 key 对应的数据；
-// 当发送者已将该 key 对应的所有数据写入后，调用 writer.Close 告知接收者：该 key 的数据已经完全写入；
-func (conn *Conn) Send(key string) (writer io.WriteCloser, err error) {
-	if writer, ok := conn.WriteCloser[key]; ok {
-		return writer, nil
+// readLoop 是 Conn 的核心，负责读取和解析所有来自对端的数据
+func (c *Conn) readLoop() {
+	defer func() {
+		// readLoop 退出时，关闭所有正在进行的 reader，并关闭 incoming channel
+		for _, writer := range c.readers {
+			writer.Close() // 让所有阻塞的 Read 调用返回 EOF
+		}
+		close(c.incoming)
+	}()
+
+	for {
+		// 1. 读取帧类型
+		var frameType byte
+		if err := binary.Read(c.netConn, binary.BigEndian, &frameType); err != nil {
+			return // 连接断开或出错
+		}
+
+		// 2. 读取 Key
+		var keyLen uint16
+		if err := binary.Read(c.netConn, binary.BigEndian, &keyLen); err != nil {
+			return
+		}
+		keyBuf := make([]byte, keyLen)
+		if _, err := io.ReadFull(c.netConn, keyBuf); err != nil {
+			return
+		}
+		key := string(keyBuf)
+
+		// 3. 根据帧类型处理
+		switch frameType {
+		case FrameTypeData:
+			// 读取数据
+			var dataLen uint32
+			if err := binary.Read(c.netConn, binary.BigEndian, &dataLen); err != nil {
+				return
+			}
+
+			// 查找或创建这个 key 对应的 pipe writer
+			writer, ok := c.readers[key]
+			if !ok {
+				// 这是一个新的 key，创建 pipe
+				pr, pw := io.Pipe()
+				c.readers[key] = pw
+				// 将新的 reader 通过 channel 发送给 Receive 调用
+				c.incoming <- incomingStream{key: key, reader: pr}
+				writer = pw
+			}
+
+			// 将数据拷贝到 pipe writer，这样另一端的 pipe reader 就能读到
+			if _, err := io.CopyN(writer, c.netConn, int64(dataLen)); err != nil {
+				return
+			}
+
+		case FrameTypeEnd:
+			// 对端告知这个 key 的数据传输完毕
+			if writer, ok := c.readers[key]; ok {
+				writer.Close()         // 关闭 pipe writer，reader 会收到 EOF
+				delete(c.readers, key) // 清理资源
+			}
+		}
 	}
-	return nil, fmt.Errorf("netConn key not found")
-}
-
-// Receive 返回一个 key 表示接收者将要接收到的数据对应的标识；
-// 返回的 reader 可供接收者多次读取该 key 对应的数据；
-// 当 reader 返回 io.EOF 错误时，表示接收者已经完整接收该 key 对应的数据；
-func (conn *Conn) Receive() (key string, reader io.Reader, err error) {
-	return "", nil, nil
-}
-
-// Close 关闭你实现的连接对象及其底层的 TCP 连接
-func (conn *Conn) Close() {
 }
 
 // NewConn 从一个 TCP 连接得到一个你实现的连接对象
 func NewConn(conn net.Conn) *Conn {
-	connect := &Conn{
-		NetConn:     conn,
-		WriteCloser: make(map[string]io.WriteCloser),
-		ReadCloser:  make(map[string]io.ReadCloser),
+	c := &Conn{
+		netConn:  conn,
+		incoming: make(chan incomingStream), // 无缓冲 channel
+		readers:  make(map[string]*io.PipeWriter),
 	}
-	return connect
+	// 关键：启动后台读取循环
+	go c.readLoop()
+	return c
 }
 
-// 除了上面规定的接口，你还可以自行定义新的类型，变量和函数以满足实现需求
+// connWriter 是 Send 方法返回的 writer 实现
+type connWriter struct {
+	conn *Conn
+	key  string
+}
+
+func (cw *connWriter) Write(p []byte) (n int, err error) {
+	// 加锁保证并发安全
+	cw.conn.writeMutex.Lock()
+	defer cw.conn.writeMutex.Unlock()
+
+	// 写入帧头
+	if err := binary.Write(cw.conn.netConn, binary.BigEndian, FrameTypeData); err != nil {
+		return 0, err
+	}
+	// 写key
+	keyBytes := []byte(cw.key)
+	if err := binary.Write(cw.conn.netConn, binary.BigEndian, uint16(len(keyBytes))); err != nil {
+		return 0, err
+	}
+	if _, err := cw.conn.netConn.Write(keyBytes); err != nil {
+		return 0, err
+	}
+	// 写 data len
+	if err := binary.Write(cw.conn.netConn, binary.BigEndian, uint32(len(p))); err != nil {
+		return 0, err
+	}
+
+	// 写入数据
+	return cw.conn.netConn.Write(p)
+}
+
+func (cw *connWriter) Close() error {
+	cw.conn.writeMutex.Lock()
+	defer cw.conn.writeMutex.Unlock()
+
+	// 发送结束帧
+	if err := binary.Write(cw.conn.netConn, binary.BigEndian, FrameTypeEnd); err != nil {
+		return err
+	}
+	// 当前key
+	keyBytes := []byte(cw.key)
+	if err := binary.Write(cw.conn.netConn, binary.BigEndian, uint16(len(keyBytes))); err != nil {
+		return err
+	}
+	_, err := cw.conn.netConn.Write(keyBytes)
+	return err
+}
+
+func (c *Conn) Send(key string) (writer io.WriteCloser, err error) {
+	// Send 的实现很简单，就是返回一个包装了 Conn 和 key 的 writer
+	return &connWriter{conn: c, key: key}, nil
+}
+
+func (c *Conn) Receive() (key string, reader io.Reader, err error) {
+	// 从 channel 接收一个数据流，如果 channel 中没有，则阻塞在这里
+	stream, ok := <-c.incoming
+	if !ok {
+		// channel 已关闭，意味着连接已断开
+		return "", nil, io.EOF
+	}
+	return stream.key, stream.reader, nil
+}
+
+func (c *Conn) Close() {
+	c.netConn.Close()
+}
 
 //////////////////////////////////////////////
 ///////// 接下来的代码为测试代码，请勿修改 /////////
