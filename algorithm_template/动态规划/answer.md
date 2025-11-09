@@ -82,4 +82,46 @@ func climbStairs2(n int) int {
 	return dp[n]
 }
 
+
+// 0-1 背包问题
+func knapsack(weights, values []int, capacity int) int {
+	n := len(weights)
+	// dp[i][j] 表示前 i 个物品在容量 j 下的最大价值
+	dp := make([][]int, n+1)
+	for i := range dp {
+		dp[i] = make([]int, capacity+1)
+	}
+
+	for i := 1; i <= n; i++ {
+		for j := 1; j <= capacity; j++ {
+			if j >= weights[i-1] {
+				// 可以选择放或不放
+				dp[i][j] = max(dp[i-1][j], dp[i-1][j-weights[i-1]]+values[i-1])
+			} else {
+				// 放不下，只能不放
+				dp[i][j] = dp[i-1][j]
+			}
+		}
+	}
+	return dp[n][capacity]
+}
+
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
+}
+
+func knapsackOptimized(weights, values []int, capacity int) int {
+	n := len(weights)
+	dp := make([]int, capacity+1)
+
+	for i := 0; i < n; i++ {
+		for j := capacity; j >= weights[i]; j-- {
+			dp[j] = max(dp[j], dp[j-weights[i]]+values[i])
+		}
+	}
+	return dp[capacity]
+}
 ```

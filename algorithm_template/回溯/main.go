@@ -38,7 +38,6 @@ func backtrack(path []int, nums []int, res *[][]int, used []bool) {
 }
 
 // 全排列
-
 func permute(nums []int) [][]int {
 	var res [][]int
 	used := make([]bool, len(nums))
@@ -144,5 +143,28 @@ func permuteUnique2(nums []int) [][]int {
 		}
 	}
 	dfs(0)
+	return res
+}
+
+// combinationSum
+func combinationSum(candidates []int, target int) [][]int {
+	var res [][]int
+	var path []int
+	var dfs func(int, int)
+	dfs = func(start, sum int) {
+		if sum == target {
+			res = append(res, append([]int(nil), path...))
+			return
+		}
+		if sum > target {
+			return
+		}
+		for i := start; i < len(candidates); i++ {
+			path = append(path, candidates[i])
+			dfs(i, sum+candidates[i]) // 可以重复选 i
+			path = path[:len(path)-1] // 回溯
+		}
+	}
+	dfs(0, 0)
 	return res
 }

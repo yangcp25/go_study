@@ -47,7 +47,7 @@ func numIslands2(grid [][]byte) int {
 	rows, cols := len(grid), len(grid[0])
 	count := 0
 
-	dirs := [][]int{{1, 0}, {-1, 0}, {0, 1}, {0, -1}}
+	dirs := [][]int{{-1, 0}, {1, 0}, {0, -1}, {0, 1}}
 
 	for r := 0; r < rows; r++ {
 		for c := 0; c < cols; c++ {

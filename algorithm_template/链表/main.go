@@ -62,8 +62,16 @@ func mergeTwoLists(list1 *ListNode, list2 *ListNode) *ListNode {
 }
 
 // 19. 删除链表倒数第 N 个节点
+/**
+ * Definition for singly-linked list.
+ * type ListNode struct {
+ *     Val int
+ *     Next *ListNode
+ * }
+ */
 func removeNthFromEnd(head *ListNode, n int) *ListNode {
-	dummy := &ListNode{Val: head.Val, Next: nil}
+	dummy := &ListNode{}
+	dummy.Next = head
 	slow, fast := dummy, dummy
 	for i := 0; i <= n; i++ {
 		fast = fast.Next

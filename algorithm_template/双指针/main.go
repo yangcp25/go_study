@@ -86,29 +86,3 @@ func Min(a, b int) int {
 	}
 	return b
 }
-
-// 快速排序
-func quickSort(nums []int, left, right int) {
-	if left >= right {
-		return
-	}
-	// 分区操作
-	pivot := partition(nums, left, right)
-	quickSort(nums, left, pivot-1)
-	quickSort(nums, pivot+1, right)
-}
-
-func partition(nums []int, left, right int) int {
-	pivot := nums[right]
-	i := left
-	for j := left; j < right; j++ {
-		if nums[j] < pivot {
-			nums[i], nums[j] = nums[j], nums[i]
-			i++
-		}
-	}
-	nums[i], nums[right] = nums[right], nums[i]
-	return i
-}
-
-// 98 验证二叉搜索树

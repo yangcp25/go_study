@@ -204,7 +204,94 @@ func cloneGraph(node *Node) *Node {
     return dfs(node)
 }
 ```
+最短路径（Dijkstra
+```go
+package main
 
+import (
+	"container/heap"
+	"fmt"
+)
+
+type Edge struct {
+	to, weight int
+}
+type Node struct {
+	id, dist int
+}
+type MinPQ []Node
+
+func (pq MinPQ) Len() int            { return len(pq) }
+func (pq MinPQ) Less(i, j int) bool  { return pq[i].dist < pq[j].dist }
+func (pq MinPQ) Swap(i, j int)       { pq[i], pq[j] = pq[j], pq[i] }
+func (pq *MinPQ) Push(x interface{}) { *pq = append(*pq, x.(Node)) }
+func (pq *MinPQ) Pop() interface{} {
+	old := *pq
+	n := len(old)
+	x := old[n-1]
+	*pq = old[:n-1]
+	return x
+}
+
+func dijkstraWithPath(n int, graph [][]Edge, start int) ([]int, []int) {
+	dist := make([]int, n)
+	prev := make([]int, n)
+	for i := range dist {
+		dist[i] = 1e9
+		prev[i] = -1
+	}
+	dist[start] = 0
+
+	pq := &MinPQ{}
+	heap.Init(pq)
+	heap.Push(pq, Node{start, 0})
+
+	for pq.Len() > 0 {
+		cur := heap.Pop(pq).(Node)
+		if cur.dist > dist[cur.id] {
+			continue
+		}
+		for _, e := range graph[cur.id] {
+			if dist[cur.id]+e.weight < dist[e.to] {
+				dist[e.to] = dist[cur.id] + e.weight
+				prev[e.to] = cur.id
+				heap.Push(pq, Node{e.to, dist[e.to]})
+			}
+		}
+	}
+	return dist, prev
+}
+
+func getPath(prev []int, start, end int) []int {
+	path := []int{}
+	for end != -1 {
+		path = append([]int{end}, path...)
+		end = prev[end]
+	}
+	if path[0] != start {
+		return []int{} // 无路径
+	}
+	return path
+}
+
+func main() {
+	// 构建图（邻接表）
+	graph := [][]Edge{
+		{{1, 4}, {2, 1}}, // 0→1(4), 0→2(1)
+		{{3, 1}},         // 1→3(1)
+		{{1, 2}, {3, 5}}, // 2→1(2), 2→3(5)
+		{},               // 3
+	}
+
+	dist, prev := dijkstraWithPath(4, graph, 0)
+
+	end := 3
+	fmt.Println("0 到 3 的最短距离:", dist[end])
+	fmt.Println("0 到 3 的路径:", getPath(prev, 0, end))
+}
+
+
+```
 ---
 
 ## 🧱 三、建议优先练习的图题列表（Top 面试常考）
