@@ -31,9 +31,9 @@ func (pq *MinPQ) Push(x interface{}) {
 func (pq *MinPQ) Pop() interface{} {
 	old := *pq
 	n := len(old)
-	x := old[n-1]
-	*pq = old[0 : n-1]
-	return x
+	node := old[n-1]
+	*pq = old[:n-1]
+	return node
 }
 
 // 123
