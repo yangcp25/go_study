@@ -14,7 +14,7 @@ func main() {
 	nums := []int{-1, 0, 1, 2, -1, -4}
 	//fmt.Println(threeSum(nums))
 
-	quickSort(nums, 0, len(nums)-1)
+	//quickSort(nums, 0, len(nums)-1)
 	fmt.Println(nums)
 }
 
@@ -63,7 +63,7 @@ func threeSum(nums []int) [][]int {
 	return res
 }
 
-// 盛雨水
+// 11 盛最多水的容器
 func maxArea(height []int) int {
 	left, right, res := 0, len(height)-1, 0
 	for left < right {
@@ -85,4 +85,30 @@ func Min(a, b int) int {
 		return a
 	}
 	return b
+}
+
+// 42 接雨水
+func trap(height []int) int {
+	left, right := 0, len(height)-1
+	leftMax, rightMax := 0, 0
+	res := 0
+
+	for left < right {
+		if height[left] < height[right] {
+			if height[left] >= leftMax {
+				leftMax = height[left]
+			} else {
+				res += leftMax - height[left]
+			}
+			left++
+		} else {
+			if height[right] >= rightMax {
+				rightMax = height[right]
+			} else {
+				res += rightMax - height[right]
+			}
+			right--
+		}
+	}
+	return res
 }
