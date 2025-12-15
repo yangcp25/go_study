@@ -4,41 +4,35 @@ func main() {
 
 }
 
-// 最长回文子串
+// 5. 最长回文子串
 func longestPalindrome(s string) string {
 	if len(s) < 2 {
 		return s
 	}
 
-	start, maxLen := 0, 1
+	start, end := 0, 0
 
 	for i := 0; i < len(s); i++ {
-		// 奇数长度回文
-		len1 := expandAroundCenter(s, i, i)
-		// 偶数长度回文
-		len2 := expandAroundCenter(s, i, i+1)
+		// 奇数回文
+		l1, r1 := expand(s, i, i)
+		// 偶数回文
+		l2, r2 := expand(s, i, i+1)
 
-		currMax := max(len1, len2)
-		if currMax > maxLen {
-			maxLen = currMax
-			start = i - (currMax-1)/2
+		if r1-l1 > end-start {
+			start, end = l1, r1
+		}
+		if r2-l2 > end-start {
+			start, end = l2, r2
 		}
 	}
 
-	return s[start : start+maxLen]
+	return s[start : end+1]
 }
 
-func expandAroundCenter(s string, left, right int) int {
-	for left >= 0 && right < len(s) && s[left] == s[right] {
-		left--
-		right++
+func expand(s string, l, r int) (int, int) {
+	for l >= 0 && r < len(s) && s[l] == s[r] {
+		l--
+		r++
 	}
-	return right - left - 1
-}
-
-func max(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
+	return l + 1, r - 1
 }
