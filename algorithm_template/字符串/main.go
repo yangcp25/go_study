@@ -36,3 +36,8 @@ func expand(s string, l, r int) (int, int) {
 	}
 	return l + 1, r - 1
 }
+
+// 3. 无重复的最长子串
+// 5. 最长回文子串
+// 128. 最长连续序列
+// 最长公共前缀
