@@ -29,6 +29,8 @@ func merge(nums1 []int, m int, nums2 []int, n int) {
 // 569 和为k的子数组
 // 53 最大子数组和
 // 56 合并区间
+// 128. 最长连续序列
+// 300. 最长递增子序列
 func merge2(intervals [][]int) [][]int {
 	if len(intervals) == 0 {
 		return intervals

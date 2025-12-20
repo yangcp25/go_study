@@ -39,5 +39,22 @@ func expand(s string, l, r int) (int, int) {
 
 // 3. 无重复的最长子串
 // 5. 最长回文子串
-// 128. 最长连续序列
+func longestCommonPrefix(strs []string) string {
+	if len(strs) == 0 {
+		return ""
+	}
+
+	for i := 0; i < len(strs[0]); i++ {
+		c := strs[0][i]
+		for j := 1; j < len(strs); j++ {
+			// 越界 或 字符不同 → 截断
+			if i >= len(strs[j]) || strs[j][i] != c {
+				return strs[0][:i]
+			}
+		}
+	}
+
+	return strs[0]
+}
+
 // 最长公共前缀

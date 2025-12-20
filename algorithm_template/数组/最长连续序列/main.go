@@ -4,6 +4,7 @@ func main() {
 
 }
 
+// 128. 最长连续序列
 func longestConsecutive(nums []int) int {
 	set := make(map[int]bool)
 	for _, n := range nums {
