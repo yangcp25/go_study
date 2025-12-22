@@ -39,6 +39,8 @@ func expand(s string, l, r int) (int, int) {
 
 // 3. 无重复的最长子串
 // 5. 最长回文子串
+
+// 最长公共前缀
 func longestCommonPrefix(strs []string) string {
 	if len(strs) == 0 {
 		return ""
@@ -56,5 +58,3 @@ func longestCommonPrefix(strs []string) string {
 
 	return strs[0]
 }
-
-// 最长公共前缀
