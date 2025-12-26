@@ -1,6 +1,9 @@
 package main
 
-import "sort"
+import (
+	"math"
+	"sort"
+)
 
 func main() {
 
@@ -82,4 +85,59 @@ func mergeTwoArray(nums1 []int, m int, nums2 []int, n int) {
 		}
 		k--
 	}
+}
+
+// 4. 寻找正序数组的中位数
+func findMedianSortedArrays(nums1 []int, nums2 []int) float64 {
+	// 保证 nums1 是更短的数组
+	if len(nums1) > len(nums2) {
+		return findMedianSortedArrays(nums2, nums1)
+	}
+	m, n := len(nums1), len(nums2)
+	total := m + n
+	half := total / 2
+
+	left, right := 0, m
+
+	for left <= right {
+		i := (left + right) / 2 // nums1 切点
+		j := half - i           // nums2 切点
+
+		// 处理边界：越界时用 ±∞ 代替
+		Aleft := math.Inf(-1)
+		if i > 0 {
+			Aleft = float64(nums1[i-1])
+		}
+		Aright := math.Inf(1)
+		if i < m {
+			Aright = float64(nums1[i])
+		}
+
+		Bleft := math.Inf(-1)
+		if j > 0 {
+			Bleft = float64(nums2[j-1])
+		}
+		Bright := math.Inf(1)
+		if j < n {
+			Bright = float64(nums2[j])
+		}
+
+		// 是否满足合法划分
+		if Aleft <= Bright && Bleft <= Aright {
+			// 已找到正确划分
+			if total%2 == 1 {
+				return math.Min(Aright, Bright)
+			}
+			return (math.Max(Aleft, Bleft) + math.Min(Aright, Bright)) / 2
+		}
+
+		// 移动二分边界
+		if Aleft > Bright {
+			right = i - 1
+		} else {
+			left = i + 1
+		}
+	}
+
+	return 0
 }
