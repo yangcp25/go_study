@@ -1,5 +1,7 @@
 package main
 
+import "sort"
+
 func main() {
 
 }
@@ -41,6 +43,7 @@ func expand(s string, l, r int) (int, int) {
 // 5. 最长回文子串
 
 // 最长公共前缀
+
 func longestCommonPrefix(strs []string) string {
 	if len(strs) == 0 {
 		return ""
@@ -57,4 +60,25 @@ func longestCommonPrefix(strs []string) string {
 	}
 
 	return strs[0]
+}
+
+// 49. 字母异位词分组
+
+func groupAnagrams(strs []string) [][]string {
+	m := make(map[string][]string)
+
+	for _, s := range strs {
+		b := []byte(s)
+		sort.Slice(b, func(i, j int) bool {
+			return b[i] < b[j]
+		})
+		key := string(b)
+		m[key] = append(m[key], s)
+	}
+
+	res := make([][]string, 0, len(m))
+	for _, v := range m {
+		res = append(res, v)
+	}
+	return res
 }
