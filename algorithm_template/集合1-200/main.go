@@ -1,7 +1,9 @@
 package main
 
 import (
+	"container/list"
 	"fmt"
+	"sort"
 )
 
 func main() {
@@ -123,5 +125,112 @@ func (l *LRUCache) RemoveTail() *Node {
 	return tail
 }
 
-//
 // 146. lru缓存v2 直接使用container
+type LRUCacheV2 struct {
+	capacity int
+	data     map[int]*list.Element
+	list     *list.List
+}
+
+func Constructor2(capacity int) LRUCacheV2 {
+	element := list.New()
+	lru := LRUCacheV2{
+		capacity: capacity,
+		data:     make(map[int]*list.Element),
+		list:     element,
+	}
+	return lru
+}
+
+type entry struct {
+	key, val int
+}
+
+func (l *LRUCacheV2) Get(key int) int {
+	if node, ok := l.data[key]; ok {
+		l.list.MoveToFront(node)
+		return node.Value.(entry).val
+	}
+	return -1
+}
+
+func (l *LRUCacheV2) Put(key, val int) {
+	if node, ok := l.data[key]; ok {
+		l.list.MoveToFront(node)
+		node.Value = entry{key, val}
+		return
+	}
+
+	e := l.list.PushFront(entry{key, val})
+	l.data[key] = e
+	if l.capacity > len(l.data) {
+		//
+		tail := l.list.Back()
+		delete(l.data, tail.Value.(entry).key)
+	}
+	sort.Slice(l.data, func(i, j int) bool {})
+
+}
+
+// 42 接雨水
+
+func trap(height []int) int {
+	count, leftMax, rightMax := 0, 0, 0
+	left, right := 0, len(height)-1
+	for left < right {
+		if height[left] < height[right] {
+			if height[left] >= leftMax {
+				leftMax = height[left]
+			} else {
+				count += leftMax - height[left]
+			}
+			left++
+		} else {
+			if height[right] >= rightMax {
+				rightMax = height[right]
+			} else {
+				count += rightMax - height[right]
+			}
+			right--
+		}
+	}
+	return count
+}
+
+// 15 三数之和
+
+func threeSum(nums []int) [][]int {
+	sort.Ints(nums)
+
+	res := make([][]int, 0)
+
+	for i := 0; i < len(nums)-2; i++ {
+		if i > 0 && nums[i] == nums[i-1] {
+			continue
+		}
+
+		left, right := i+1, len(nums)-1
+
+		for left < right {
+			sum := nums[i] + nums[left] + nums[right]
+
+			if sum == 0 {
+				res = append(res, []int{nums[i], nums[left], nums[right]})
+
+				for left < right && nums[left] == nums[left+1] {
+					left++
+				}
+				for left < right && nums[right] == nums[right-1] {
+					right--
+				}
+				left++
+				right--
+			} else if sum < 0 {
+				left++
+			} else {
+				right--
+			}
+		}
+	}
+	return res
+}
