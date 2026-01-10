@@ -1,6 +1,7 @@
 package main
 
 import (
+	"container/heap"
 	"container/list"
 	"fmt"
 	"sort"
@@ -168,8 +169,6 @@ func (l *LRUCacheV2) Put(key, val int) {
 		tail := l.list.Back()
 		delete(l.data, tail.Value.(entry).key)
 	}
-	sort.Slice(l.data, func(i, j int) bool {})
-
 }
 
 // 42 接雨水
@@ -233,4 +232,107 @@ func threeSum(nums []int) [][]int {
 		}
 	}
 	return res
+}
+
+func findKthLargest(nums []int, k int) int {
+	h := &minHeadp{}
+	heap.Init(h)
+
+	for _, v := range nums {
+		heap.Push(h, v)
+
+		if h.Len() > k {
+			heap.Pop(h)
+		}
+	}
+
+	return heap.Pop(h).(int)
+}
+
+type minHeadp []int
+
+func (h *minHeadp) Len() int {
+	return len(*h)
+}
+
+func (h minHeadp) Less(i, j int) bool {
+	return h[i] < h[j]
+}
+
+func (h minHeadp) Swap(i, j int) {
+	h[i], h[j] = h[j], h[i]
+}
+
+func (h *minHeadp) Push(n interface{}) {
+	*h = append(*h, n.(int))
+}
+
+func (h *minHeadp) Pop() interface{} {
+	old := *h
+	n := len(old)
+	x := old[n-1]
+	*h = old[0 : n-1]
+	return x
+}
+
+// 560 和为k的子数组
+
+func subarraySum(nums []int, k int) int {
+	set := map[int]int{0: 1}
+	sum, count := 0, 0
+	for _, v := range nums {
+		sum += v
+		if num, ok := set[sum-k]; ok {
+			count += num
+		}
+		set[sum]++
+	}
+	return count
+}
+
+// 56 合并区间
+
+func merge(intervals [][]int) [][]int {
+	sort.Slice(intervals, func(i, j int) bool {
+		return intervals[i][0] < intervals[j][0]
+	})
+
+	res := make([][]int, 0)
+	start, end := intervals[0][0], intervals[0][1]
+
+	for i := 1; i < len(intervals); i++ {
+		if end >= intervals[i][0] {
+			end = Max(intervals[i][1], end)
+		} else {
+			res = append(res, []int{start, end})
+			start, end = intervals[i][0], intervals[i][1]
+		}
+	}
+	res = append(res, []int{start, end})
+	return res
+}
+
+func Max(a, b int) int {
+	if a > b {
+		return a
+	}
+
+	return b
+}
+
+// 88 合并2个有序数组
+
+func merge2(nums1 []int, m int, nums2 []int, n int) {
+	i, j, k := m-1, n-1, m+n-1
+
+	for j >= 0 {
+		if i >= 0 && nums1[i] >= nums2[j] {
+			nums1[k] = nums1[i]
+			i--
+		} else {
+			nums1[k] = nums2[j]
+			j--
+		}
+		k--
+	}
 }
