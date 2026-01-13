@@ -4,6 +4,7 @@ import (
 	"container/heap"
 	"container/list"
 	"fmt"
+	"math"
 	"sort"
 )
 
@@ -335,4 +336,85 @@ func merge2(nums1 []int, m int, nums2 []int, n int) {
 		}
 		k--
 	}
+}
+
+// 4. 寻找2个正序数组的中位数
+func findMedianSortedArrays(nums1 []int, nums2 []int) float64 {
+	if len(nums1) > len(nums2) {
+		return findMedianSortedArrays(nums2, nums1)
+	}
+	m, n := len(nums1), len(nums2)
+
+	left, right := 0, m
+
+	for left <= right {
+		i := (left + right) / 2
+		j := (m+n+1)/2 - i
+
+		ALeft := math.MinInt
+		if i > 0 {
+			ALeft = nums1[i-1]
+		}
+
+		ARight := math.MaxInt
+		if i < m {
+			ARight = nums1[i]
+		}
+
+		BLeft := math.MinInt
+		if j > 0 {
+			BLeft = nums2[j-1]
+		}
+
+		BRight := math.MaxInt
+		if j < n {
+			BRight = nums2[j]
+		}
+
+		if ALeft <= BRight && BLeft <= ARight {
+			if (m+n)%2 == 1 {
+				return float64(Max(ALeft, BLeft))
+			}
+
+			return float64(Max(ALeft, BLeft)+Min(ARight, BRight)) / 2
+		}
+
+		if ALeft > BRight {
+			right = i - 1
+		} else {
+			left = i + 1
+		}
+	}
+
+	return 0
+}
+
+func Min(a, b int) int {
+	if a < b {
+		return a
+	}
+
+	return b
+}
+
+// 14. 最长公共前缀
+
+func longestCommonPrefix(strs []string) string {
+	if len(strs) == 0 {
+		return ""
+	}
+
+	i := 0
+Outlook:
+	for ; i < len(strs[0]); i++ {
+		for j := 1; j < len(strs); j++ {
+			if i < len(strs[j]) && strs[0][i] == strs[j][i] {
+
+			} else {
+				break Outlook
+			}
+		}
+	}
+
+	return strs[0][0:i]
 }
