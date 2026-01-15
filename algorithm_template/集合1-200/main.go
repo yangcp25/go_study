@@ -418,3 +418,80 @@ Outlook:
 
 	return strs[0][0:i]
 }
+
+// 54. 螺旋矩阵
+func spiralOrder(matrix [][]int) []int {
+	//
+	m, n := len(matrix), len(matrix[0])
+	left, right, top, bottom := 0, n-1, 0, m-1
+	res := make([]int, 0)
+	for top <= bottom && left <= right {
+		// 上
+		for col := left; col <= right; col++ {
+			res = append(res, matrix[top][col])
+		}
+		top++
+		// 右
+		for row := top; row <= bottom; row++ {
+			res = append(res, matrix[row][right])
+		}
+		right--
+
+		if top > bottom || left > right {
+			break
+		}
+
+		// 下
+		for col := right; col >= left; col-- {
+			res = append(res, matrix[bottom][col])
+		}
+		bottom--
+		// 左边
+
+		for row := bottom; row >= top; row-- {
+			res = append(res, matrix[row][left])
+		}
+		left++
+	}
+
+	return res
+}
+
+// 21 合并2个有序链表
+
+/**
+ * Definition for singly-linked list.
+ * type ListNode struct {
+ *     Val int
+ *     Next *ListNode
+ * }
+ */
+
+type ListNode struct {
+	Val  int
+	Next *ListNode
+}
+
+func mergeTwoLists(list1 *ListNode, list2 *ListNode) *ListNode {
+	dummy := &ListNode{}
+	head := dummy
+
+	for list1 != nil && list2 != nil {
+		if list1.Val < list2.Val {
+			head.Next = list1
+			list1 = list1.Next
+		} else {
+			head.Next = list2
+			list2 = list2.Next
+		}
+		head = head.Next
+	}
+
+	if list1 != nil {
+		head.Next = list1
+	} else {
+		head.Next = list2
+	}
+
+	return dummy.Next
+}
