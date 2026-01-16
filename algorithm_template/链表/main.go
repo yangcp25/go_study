@@ -57,13 +57,13 @@ func hasCycle(head *ListNode) bool {
 }
 
 // 21. 合并两个有序链表
-func mergeTwoLists(list1 *ListNode, list2 *ListNode) *ListNode {
-
-}
+//func mergeTwoLists(list1 *ListNode, list2 *ListNode) *ListNode {
+//
+//}
 
 // 19. 删除链表倒数第 N 个节点
 /**
- * Definition for singly-linked list.
+ * Definition for a singly-linked list.
  * type ListNode struct {
  *     Val int
  *     Next *ListNode

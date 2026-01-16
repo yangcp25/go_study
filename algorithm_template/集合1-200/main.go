@@ -458,9 +458,8 @@ func spiralOrder(matrix [][]int) []int {
 }
 
 // 21 合并2个有序链表
-
 /**
- * Definition for singly-linked list.
+ * Definition for a singly-linked list.
  * type ListNode struct {
  *     Val int
  *     Next *ListNode
