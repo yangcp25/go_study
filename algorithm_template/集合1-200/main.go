@@ -514,3 +514,21 @@ func search(nums []int, target int) int {
 
 	return -1
 }
+
+// 9 回文数
+
+func isPalindrome(x int) bool {
+	// 边界
+	if x < 0 || (x%10 == 0 && x != 0) {
+		return false
+	}
+
+	reverted := 0
+	for x > reverted {
+		reverted = reverted*10 + x%10
+		x /= 10
+	}
+
+	// 偶数位 or 奇数位
+	return x == reverted || x == reverted/10
+}
