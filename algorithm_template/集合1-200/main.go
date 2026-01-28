@@ -532,3 +532,34 @@ func isPalindrome(x int) bool {
 	// 偶数位 or 奇数位
 	return x == reverted || x == reverted/10
 }
+
+// 46 全排列
+
+func permute(nums []int) [][]int {
+	res := make([][]int, 0)
+	path := make([]int, 0)
+	used := make(map[int]bool)
+	var backtrack func(nums []int, path []int, used map[int]bool)
+
+	backtrack = func(nums []int, path []int, used map[int]bool) {
+		if len(path) >= len(nums) {
+			temp := make([]int, len(nums))
+			copy(temp, path)
+			res = append(res, temp)
+		}
+		for i := 0; i < len(nums); i++ {
+			if used[nums[i]] {
+				continue
+			}
+			path = append(path, nums[i])
+			used[nums[i]] = true
+			backtrack(nums, path, used)
+			path = path[:len(path)-1]
+			used[nums[i]] = false
+		}
+	}
+
+	backtrack(nums, path, used)
+
+	return res
+}
