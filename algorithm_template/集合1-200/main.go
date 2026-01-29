@@ -277,7 +277,6 @@ func (h *minHeadp) Pop() interface{} {
 }
 
 // 560 和为k的子数组
-
 func subarraySum(nums []int, k int) int {
 	set := map[int]int{0: 1}
 	sum, count := 0, 0
@@ -562,4 +561,18 @@ func permute(nums []int) [][]int {
 	backtrack(nums, path, used)
 
 	return res
+}
+
+// 27 移除元素
+func removeElement(nums []int, val int) int {
+	i, j := 0, 0
+
+	for j < len(nums) {
+		if nums[j] != val {
+			nums[i], nums[j] = nums[j], nums[i]
+			i++
+		}
+		j++
+	}
+	return i
 }
