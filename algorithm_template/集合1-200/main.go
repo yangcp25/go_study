@@ -671,3 +671,73 @@ func (h *MinHeap) Pop() any {
 	*h = old[:n-1]
 	return x
 }
+
+// 32 最长的有效括号
+
+func longestValidParentheses(s string) int {
+	n := len(s)
+	stack := make([]int, 0)
+	stack = append(stack, -1)
+	maxLen := 0
+	for i := 0; i < n; i++ {
+		if s[i] == '(' {
+			stack = append(stack, i)
+		} else {
+			// 尝试出站
+			stack = stack[:len(stack)-1]
+			if len(stack) == 0 {
+				stack = append(stack, i)
+			}
+			currLen := i - stack[len(stack)-1]
+			if currLen > maxLen {
+				maxLen = currLen
+			}
+		}
+	}
+	return maxLen
+}
+
+// 45 跳跃游戏2
+func jump(nums []int) int {
+	end := 0      // 表示当前层能到的最远距离
+	farthest := 0 // 扫描当前层能达到的最远距离
+	step := 0
+	for i := 0; i < len(nums)-1; i++ {
+		if i+nums[i] > farthest {
+			farthest = i + nums[i]
+		}
+
+		if i == end {
+			step++
+			end = farthest
+		}
+	}
+
+	return step
+}
+
+// 160 相交链表
+
+/**
+ * Definition for singly-linked list.
+ * type ListNode struct {
+ *     Val int
+ *     Next *ListNode
+ * }
+ */
+func getIntersectionNode(headA, headB *ListNode) *ListNode {
+	m := make(map[*ListNode]bool)
+
+	for headA != nil {
+		m[headA] = true
+		headA = headA.Next
+	}
+
+	for headB != nil {
+		if _, ok := m[headB]; ok {
+			return headB
+		}
+		headB = headB.Next
+	}
+	return nil
+}
