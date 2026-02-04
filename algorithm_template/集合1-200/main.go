@@ -741,3 +741,66 @@ func getIntersectionNode(headA, headB *ListNode) *ListNode {
 	}
 	return nil
 }
+
+// 143 重排链表
+func reorderList(head *ListNode) {
+	if head == nil || head.Next == nil {
+		return
+	}
+
+	// 1. 找中点
+	slow, fast := head, head
+	for fast.Next != nil && fast.Next.Next != nil {
+		slow = slow.Next
+		fast = fast.Next.Next
+	}
+
+	// 2. 反转后半段
+	second := reverse(slow.Next)
+	slow.Next = nil // 断开前后
+
+	// 3. 合并
+	first := head
+	for second != nil {
+		tmp1 := first.Next
+		tmp2 := second.Next
+
+		first.Next = second
+		second.Next = tmp1
+
+		first = tmp1
+		second = tmp2
+	}
+}
+
+func reverse(head *ListNode) *ListNode {
+	var prev *ListNode
+	for head != nil {
+		next := head.Next
+		head.Next = prev
+		prev = head
+		head = next
+	}
+	return prev
+}
+
+func reorderList2(head *ListNode) {
+	if head == nil {
+		return
+	}
+	nodes := []*ListNode{}
+	for node := head; node != nil; node = node.Next {
+		nodes = append(nodes, node)
+	}
+	i, j := 0, len(nodes)-1
+	for i < j {
+		nodes[i].Next = nodes[j]
+		i++
+		if i == j {
+			break
+		}
+		nodes[j].Next = nodes[i]
+		j--
+	}
+	nodes[i].Next = nil
+}
