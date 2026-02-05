@@ -5,6 +5,7 @@ import (
 	"container/list"
 	"fmt"
 	"math"
+	"math/rand"
 	"sort"
 )
 
@@ -803,4 +804,34 @@ func reorderList2(head *ListNode) {
 		j--
 	}
 	nodes[i].Next = nil
+}
+
+// 912 排序数组
+func sortArray(nums []int) []int {
+	quickSort(nums, 0, len(nums)-1)
+	return nums
+}
+func quickSort(nums []int, start, end int) {
+	if start >= end {
+		return
+	}
+	p := rand.Intn(end-start+1) + start
+	nums[end], nums[p] = nums[p], nums[end]
+
+	pviot := partion(nums, start, end)
+	quickSort(nums, start, pviot-1)
+	quickSort(nums, pviot+1, end)
+}
+func partion(nums []int, start, end int) int {
+	proit := nums[end]
+	left, right := start, start
+	for right < end {
+		if nums[right] < proit {
+			nums[left], nums[right] = nums[right], nums[left]
+			left++
+		}
+		right++
+	}
+	nums[left], nums[end] = nums[end], nums[left]
+	return left
 }
