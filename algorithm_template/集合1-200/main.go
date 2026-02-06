@@ -818,15 +818,15 @@ func quickSort(nums []int, start, end int) {
 	p := rand.Intn(end-start+1) + start
 	nums[end], nums[p] = nums[p], nums[end]
 
-	pviot := partion(nums, start, end)
-	quickSort(nums, start, pviot-1)
-	quickSort(nums, pviot+1, end)
+	mid := partition(nums, start, end)
+	quickSort(nums, start, mid-1)
+	quickSort(nums, mid+1, end)
 }
-func partion(nums []int, start, end int) int {
-	proit := nums[end]
+func partition(nums []int, start, end int) int {
+	pivot := nums[end]
 	left, right := start, start
 	for right < end {
-		if nums[right] < proit {
+		if nums[right] < pivot {
 			nums[left], nums[right] = nums[right], nums[left]
 			left++
 		}
@@ -834,4 +834,39 @@ func partion(nums []int, start, end int) int {
 	}
 	nums[left], nums[end] = nums[end], nums[left]
 	return left
+}
+
+// 归并排序
+
+func sortArray(nums []int) []int {
+	n := len(nums)
+
+	if n <= 1 {
+		return nums
+	}
+
+	mid := n / 2
+	left := sortArray(nums[:mid])
+	right := sortArray(nums[mid:])
+
+	return merge3(left, right)
+}
+
+func merge3(left, right []int) []int {
+	m, n := len(left), len(right)
+	res := make([]int, 0, m+n)
+	i, j := 0, 0
+	for i < m && j < n {
+		if left[i] <= right[j] {
+			res = append(res, left[i])
+			i++
+		} else {
+			res = append(res, right[j])
+			j++
+		}
+	}
+	res = append(res, left[i:]...)
+	res = append(res, right[j:]...)
+
+	return res
 }
