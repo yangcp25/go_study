@@ -837,8 +837,7 @@ func partition(nums []int, start, end int) int {
 }
 
 // 归并排序
-
-func sortArray(nums []int) []int {
+func sortArray3(nums []int) []int {
 	n := len(nums)
 
 	if n <= 1 {
@@ -869,4 +868,28 @@ func merge3(left, right []int) []int {
 	res = append(res, right[j:]...)
 
 	return res
+}
+
+// 139 单词拆分
+func wordBreak(s string, wordDict []string) bool {
+	// 前i个字符能否被前j个字典拼成
+	m := len(s)
+	set := make(map[string]bool)
+	for _, v := range wordDict {
+		set[v] = true
+	}
+	dp := make([]bool, m+1)
+	dp[0] = true
+
+	for i := 1; i < m; i++ {
+		for j := 0; j < i; j++ {
+			if dp[j] && set[s[j:i]] {
+				dp[i] = true
+				break
+			}
+		}
+	}
+
+	return dp[m]
+
 }
