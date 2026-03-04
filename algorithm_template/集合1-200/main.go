@@ -26,6 +26,39 @@ func twoSum(nums []int, target int) []int {
 	return []int{-1, -1}
 }
 
+// 5 最长回文数
+
+func longestPalindrome(s string) string {
+	if len(s) < 2 {
+		return s
+	}
+
+	start, end := 0, 0
+
+	for i := 0; i < len(s); i++ {
+		// 奇数回文
+		l1, r1 := expand(s, i, i)
+		// 偶数回文
+		l2, r2 := expand(s, i, i+1)
+
+		if r1-l1 > end-start {
+			start, end = l1, r1
+		}
+		if r2-l2 > end-start {
+			start, end = l2, r2
+		}
+	}
+
+	return s[start : end+1]
+}
+func expand(s string, l, r int) (int, int) {
+	for l >= 0 && r < len(s) && s[l] == s[r] {
+		l--
+		r++
+	}
+	return l + 1, r - 1
+}
+
 // 3. 最长无重复子串
 func lengthOfLongestSubstring(s string) int {
 	count, left, right := 0, 0, 0
@@ -174,7 +207,6 @@ func (l *LRUCacheV2) Put(key, val int) {
 }
 
 // 42 接雨水
-
 func trap(height []int) int {
 	count, leftMax, rightMax := 0, 0, 0
 	left, right := 0, len(height)-1
@@ -199,7 +231,6 @@ func trap(height []int) int {
 }
 
 // 15 三数之和
-
 func threeSum(nums []int) [][]int {
 	sort.Ints(nums)
 
@@ -292,7 +323,6 @@ func subarraySum(nums []int, k int) int {
 }
 
 // 56 合并区间
-
 func merge(intervals [][]int) [][]int {
 	sort.Slice(intervals, func(i, j int) bool {
 		return intervals[i][0] < intervals[j][0]
@@ -322,7 +352,6 @@ func Max(a, b int) int {
 }
 
 // 88 合并2个有序数组
-
 func merge2(nums1 []int, m int, nums2 []int, n int) {
 	i, j, k := m-1, n-1, m+n-1
 
